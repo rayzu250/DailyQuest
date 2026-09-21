@@ -125,23 +125,35 @@ screen view_tasks_screen():
 
     text "Lista: [current_list.capitalize()]" style "todo_text" size 34 xalign 0.5 ypos 115
 
-    # Selector de listas
+    # Selector de listas con scroll horizontal
     hbox:
         xalign 0.5
         ypos 170
         spacing 10
 
-        for lname in task_lists:
-            textbutton lname.capitalize() action SetVariable("current_list", lname):
-                style "todo_button"
-                text_size 30
-                xminimum 140
-                yminimum 62
+        viewport:
+            xsize 940
+            ysize 96
+            scrollbars "horizontal"
+            draggable True
+            mousewheel "horizontal"
+
+            hbox:
+                spacing 10
+
+                for lname in task_lists:
+                    $ lbg = Frame(Solid("#FFD54F"), 12, 12) if lname == current_list else None
+                    textbutton lname.capitalize() action SetVariable("current_list", lname):
+                        style "todo_button"
+                        text_size 30
+                        xminimum 150
+                        yminimum 62
+                        background lbg
 
         textbutton "Listas" action Show("lists_screen"):
             style "todo_button"
             text_size 30
-            xminimum 140
+            xminimum 150
             yminimum 62
 
     $ shown = [i for i, t in enumerate(tasks) if t.get("list", task_lists[0]) == current_list]
@@ -169,8 +181,8 @@ screen view_tasks_screen():
                     $ status = "✓  " if t["done"] else "○  "
                     $ color_status = "#A5D6A7" if t["done"] else "#FFFFFF"
                     $ sp = subtask_progress(t)
-                    $ dl = t.get("deadline")
-                    $ dcolor = deadline_color(t)
+                    $ dl = next_deadline(t)
+                    $ dcolor = deadline_date_color(dl)
 
                     frame:
                         background Solid("#FFFFFF22")
@@ -211,7 +223,7 @@ screen view_tasks_screen():
         spacing 40
 
         textbutton "Volver" action Hide("view_tasks_screen") style "todo_button" text_style "todo_button_text"
-        textbutton "Agregar tarea" action Show("add_task_screen") style "todo_button" text_style "todo_button_text"
+        textbutton "Agregar tarea" action [SetVariable("new_task_list", current_list), Show("add_task_screen")] style "todo_button" text_style "todo_button_text"
 
 ################################################################################
 ## Pantalla: Agregar tarea
@@ -245,17 +257,26 @@ screen add_task_screen():
 
     text "¿En qué lista?" style "todo_text" xalign 0.5 ypos 430
 
-    hbox:
+    viewport:
         xalign 0.5
         ypos 490
-        spacing 12
+        xsize 940
+        ysize 96
+        scrollbars "horizontal"
+        draggable True
+        mousewheel "horizontal"
 
-        for lname in task_lists:
-            textbutton lname.capitalize() action SetVariable("new_task_list", lname):
-                style "todo_button"
-                text_size 30
-                xminimum 180
-                yminimum 66
+        hbox:
+            spacing 12
+
+            for lname in task_lists:
+                $ lbg = Frame(Solid("#FFD54F"), 12, 12) if lname == new_task_list else None
+                textbutton lname.capitalize() action SetVariable("new_task_list", lname):
+                    style "todo_button"
+                    text_size 30
+                    xminimum 180
+                    yminimum 62
+                    background lbg
 
     hbox:
         xalign 0.5
@@ -382,6 +403,8 @@ screen task_detail_screen(i):
                     for j, st in enumerate(substeps):
                         $ st_mark = "✓  " if st.get("done", False) else "○  "
                         $ st_color = "#A5D6A7" if st.get("done", False) else "#FFFFFF"
+                        $ sdl = st.get("deadline")
+                        $ sdc = subtask_deadline_color(st)
 
                         frame:
                             background Solid("#FFFFFF22")
@@ -389,16 +412,24 @@ screen task_detail_screen(i):
                             xminimum 850
 
                             hbox:
-                                spacing 15
+                                spacing 12
                                 textbutton "[st_mark][st.get('text', '')]" action Function(toggle_subtask, i, j):
                                     style "subtask_button"
                                     text_style "subtask_text"
                                     text_color st_color
+                                    xminimum 400
+                                if valid_date(sdl):
+                                    text date_tuple_to_string(sdl) style "subtask_text" size 28 color (sdc or "#81C784") xalign 0.5 xminimum 110
+                                textbutton "Fecha" action Show("deadline_pick_screen", i=i, j=j):
+                                    style "todo_button"
+                                    text_size 26
+                                    xminimum 130
+                                    yminimum 58
                                 textbutton "✕" action Function(remove_subtask, i, j):
                                     style "todo_button"
-                                    text_size 30
-                                    xminimum 110
-                                    yminimum 64
+                                    text_size 28
+                                    xminimum 100
+                                    yminimum 58
 
         # Entrada para agregar subtarea
         frame:
@@ -419,19 +450,6 @@ screen task_detail_screen(i):
         textbutton "Agregar" action [Function(add_subtask, i, new_subtask), SetVariable("new_subtask", "")] style "todo_button" text_style "todo_button_text":
             xalign 0.5
             ypos 880
-
-        # Fecha límite
-        $ deadline_text = date_tuple_to_string(t.get("deadline"))
-
-        text "Fecha límite: [deadline_text]" style "todo_text" size 38 xalign 0.5 ypos 1020
-
-        hbox:
-            xalign 0.5
-            ypos 1100
-            spacing 20
-
-            textbutton "Cambiar" action Show("deadline_pick_screen", i=i) style "todo_button" text_style "todo_button_text"
-            textbutton "Quitar" action Function(set_deadline, i, None) style "todo_button" text_style "todo_button_text"
 
         textbutton "Volver" action Hide("task_detail_screen") style "todo_button" text_style "todo_button_text":
             xalign 0.5
@@ -555,7 +573,7 @@ screen lists_screen():
 ## Pantalla: Elegir fecha límite
 ################################################################################
 
-screen deadline_pick_screen(i):
+screen deadline_pick_screen(i, j=None):
     modal True
 
     add Solid(themes[current_theme]["bg"])
@@ -574,19 +592,21 @@ screen deadline_pick_screen(i):
         spacing 30
 
         textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 190
+            xminimum 160
         textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 190
+            xminimum 160
         textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 190
+            xminimum 160
 
-    hbox:
+    grid 7 1:
         xalign 0.5
         ypos 260
-        spacing 8
+        xspacing 8
 
         for wd in WEEKDAYS_ES:
-            text wd style "todo_text" size 34 xalign 0.5 xsize 120
+            fixed:
+                xsize 120
+                text wd style "todo_text" size 34 xalign 0.5 yalign 0.5
 
     vbox:
         xalign 0.5
@@ -594,20 +614,21 @@ screen deadline_pick_screen(i):
         spacing 8
 
         for week in grid:
-            hbox:
-                spacing 8
+            grid 7 1:
                 xalign 0.5
+                xspacing 8
 
                 for d in week:
                     $ dkey = (d.year, d.month, d.day)
                     $ in_month = d.month == cm
                     $ is_today = dkey == today_tuple()
-                    $ has_dl = any(t.get("deadline") == dkey for t in tasks)
+                    $ has_dl = count_deadlines_on(dkey) > 0
                     $ d_bg = "#4CAF5088" if has_dl else ("#FFFFFF33" if in_month else "#FFFFFF11")
                     $ d_tcolor = "#FFD54F" if is_today else ("#FFFFFF55" if not in_month else "#FFFFFF")
+                    $ d_action = Function(set_subtask_deadline, i, j, dkey) if j is not None else Function(set_deadline, i, dkey)
 
                     textbutton str(d.day):
-                        action Function(set_deadline, i, dkey)
+                        action d_action
                         background d_bg
                         style "cal_day"
                         text_style "cal_day_text"
@@ -615,7 +636,9 @@ screen deadline_pick_screen(i):
                         xsize 120
                         ysize 76
 
-    textbutton "Quitar fecha" action [Function(set_deadline, i, None), Hide("deadline_pick_screen")] style "todo_button" text_style "todo_button_text":
+    $ clear_dl_action = [Function(set_subtask_deadline, i, j, None) if j is not None else Function(set_deadline, i, None), Hide("deadline_pick_screen")]
+
+    textbutton "Quitar fecha" action clear_dl_action style "todo_button" text_style "todo_button_text":
         xalign 0.5
         ypos 850
 
@@ -647,19 +670,21 @@ screen calendar_screen():
         spacing 30
 
         textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 190
+            xminimum 160
         textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 190
+            xminimum 160
         textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 190
+            xminimum 160
 
-    hbox:
+    grid 7 1:
         xalign 0.5
         ypos 252
-        spacing 8
+        xspacing 8
 
         for wd in WEEKDAYS_ES:
-            text wd style "todo_text" size 34 xalign 0.5 xsize 120
+            fixed:
+                xsize 120
+                text wd style "todo_text" size 34 xalign 0.5 yalign 0.5
 
     vbox:
         xalign 0.5
@@ -667,19 +692,19 @@ screen calendar_screen():
         spacing 7
 
         for week in grid:
-            hbox:
-                spacing 8
+            grid 7 1:
                 xalign 0.5
+                xspacing 8
 
                 for d in week:
                     $ dkey = (d.year, d.month, d.day)
                     $ in_month = d.month == cm
                     $ is_today = dkey == today_tuple()
                     $ is_sel = dkey == sel
-                    $ n_dl = sum(1 for t in tasks if t.get("deadline") == dkey)
+                    $ n_dl = count_deadlines_on(dkey)
                     $ dlabel = ("%d" % d.day) + (("  ·%d" % n_dl) if n_dl else "")
-                    $ d_bg = "#26A69ACC" if is_sel else ("#4CAF5088" if n_dl else ("#FFD54F44" if is_today else ("#FFFFFF33" if in_month else "#FFFFFF11")))
-                    $ d_tcolor = "#FFD54F" if (is_sel or is_today) else ("#FFFFFF55" if not in_month else "#FFFFFF")
+                    $ d_bg = "#E8F5E9" if is_sel else ("#4CAF5088" if n_dl else ("#FFD54F44" if is_today else ("#FFFFFF33" if in_month else "#FFFFFF11")))
+                    $ d_tcolor = "#1B5E20" if is_sel else ("#FFD54F" if is_today else ("#FFFFFF55" if not in_month else "#FFFFFF"))
 
                     textbutton dlabel:
                         action SetVariable("cal_selected", dkey)
@@ -694,7 +719,15 @@ screen calendar_screen():
 
     text "[sel_title]" style "todo_text" size 36 xalign 0.5 ypos 800
 
-    $ sel_tasks = [(idx, t) for idx, t in enumerate(tasks) if t.get("deadline") == sel]
+    python:
+        sel_tasks = []
+        for idx, t in enumerate(tasks):
+            steps = t.get("subtasks", [])
+            for j, s in enumerate(steps):
+                if valid_date(s.get("deadline")) and tuple(s["deadline"]) == sel:
+                    sel_tasks.append((idx, j, s.get("text", "")))
+            if not steps and valid_date(t.get("deadline")) and tuple(t["deadline"]) == sel:
+                sel_tasks.append((idx, None, ""))
 
     if not sel_tasks:
         text "No hay tareas para este día." style "todo_text" xalign 0.5 ypos 845
@@ -712,8 +745,10 @@ screen calendar_screen():
                 spacing 18
                 xalign 0.5
 
-                for idx, t in sel_tasks:
+                for idx, j, stext in sel_tasks:
+                    $ t = tasks[idx]
                     $ c_status = "#A5D6A7" if t["done"] else "#FFFFFF"
+                    $ dlabel2 = t["title"] + ((" - " + stext) if stext else "")
 
                     frame:
                         background Solid("#FFFFFF22")
@@ -722,8 +757,8 @@ screen calendar_screen():
 
                         hbox:
                             spacing 15
-                            text "[t['title']]" style "task_item" color c_status xmaximum 420
-                            text "· [t.get('list', task_lists[0]).capitalize()]" style "task_item" size 30 color "#B9F6CA" xmaximum 130
+                            text "[dlabel2]" style "task_item" color c_status xmaximum 540
+                            text "· [t.get('list', task_lists[0]).capitalize()]" style "task_item" size 30 color "#B9F6CA" xmaximum 180
                             textbutton "Abrir" action Show("task_detail_screen", i=idx):
                                 style "todo_button"
                                 text_size 30

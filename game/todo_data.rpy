@@ -53,7 +53,7 @@ init python:
     def add_subtask(task_index, text):
         text = text.strip()
         if text and 0 <= task_index < len(store.tasks):
-            store.tasks[task_index].setdefault("subtasks", []).append({"text": text, "done": False})
+            store.tasks[task_index].setdefault("subtasks", []).append({"text": text, "done": False, "deadline": None})
             renpy.notify("¡Subtarea agregada!")
 
     def toggle_subtask(task_index, subtask_index):
@@ -124,6 +124,63 @@ init python:
             store.tasks[task_index]["deadline"] = dtuple
             renpy.notify("Fecha límite actualizada" if dtuple else "Fecha límite eliminada")
 
+    def set_subtask_deadline(task_index, subtask_index, dtuple):
+        steps = store.tasks[task_index].get("subtasks", []) if 0 <= task_index < len(store.tasks) else []
+        if 0 <= subtask_index < len(steps):
+            steps[subtask_index]["deadline"] = dtuple
+            renpy.notify("Fecha límite actualizada" if dtuple else "Fecha límite eliminada")
+
+    def deadline_date_color(d):
+        if not valid_date(d):
+            return None
+        t = today_tuple()
+        if (d[0], d[1], d[2]) < (t[0], t[1], t[2]):
+            return "#EF5350"
+        if (d[0], d[1], d[2]) == (t[0], t[1], t[2]):
+            return "#FFD54F"
+        return "#81C784"
+
+    def subtask_deadline_color(sub):
+        return deadline_date_color(sub.get("deadline"))
+
+    # Fechas relevantes de una tarea: las de sus subtareas o, a modo de
+    # compatibilidad, la fecha que existía a nivel de tarea si esta no tiene
+    # subtareas.
+    def _task_deadlines(task):
+        ds = [tuple(s["deadline"]) for s in task.get("subtasks", []) if valid_date(s.get("deadline"))]
+        if not ds and valid_date(task.get("deadline")):
+            ds = [tuple(task["deadline"])]
+        return ds
+
+    # Devuelve la fecha límite más próxima (None si no hay ninguna)
+    def next_deadline(task):
+        ds = _task_deadlines(task)
+        return min(ds) if ds else None
+
+    # Cuenta cuántas fechas límite (de subtareas o de tarea legada) caen en un día
+    def count_deadlines_on(dkey):
+        n = 0
+        for t in store.tasks:
+            for s in t.get("subtasks", []):
+                if valid_date(s.get("deadline")) and tuple(s["deadline"]) == dkey:
+                    n += 1
+            steps = t.get("subtasks", [])
+            if not steps and valid_date(t.get("deadline")) and tuple(t["deadline"]) == dkey:
+                n += 1
+        return n
+
+    # Migra fechas de nivel tarea a sus subtareas al cargar una partida guardada
+    def _migrate_deadlines():
+        for t in store.tasks:
+            d = t.get("deadline")
+            steps = t.get("subtasks", [])
+            if d and valid_date(d) and steps:
+                for s in steps:
+                    if not s.get("deadline"):
+                        s["deadline"] = tuple(d)
+
+    config.after_load_callbacks.append(_migrate_deadlines)
+
     def is_overdue(task):
         d = task.get("deadline")
         if not valid_date(d):
@@ -132,14 +189,7 @@ init python:
         return (d[0], d[1], d[2]) < (t[0], t[1], t[2])
 
     def deadline_color(task):
-        d = task.get("deadline")
-        if not valid_date(d):
-            return None
-        if is_overdue(task):
-            return "#EF5350"
-        if d == today_tuple():
-            return "#FFD54F"
-        return "#81C784"
+        return deadline_date_color(task.get("deadline"))
 
     # --- Navegación del selector/calendario ---
 
