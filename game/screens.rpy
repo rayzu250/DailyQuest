@@ -134,7 +134,7 @@ style window:
     yalign gui.textbox_yalign
     ysize gui.textbox_height
 
-    background Image("gui/textbox.png", xalign=0.5, yalign=1.0)
+    background Frame("gui/textbox.png", Borders(120, 40, 120, 40))
 
 style namebox:
     xpos gui.name_xpos
@@ -341,6 +341,7 @@ style navigation_button:
 
 style navigation_button_text:
     properties gui.text_properties("navigation_button")
+    size 40
 
 
 ## Pantalla del menú principal #################################################
@@ -400,9 +401,11 @@ style main_menu_text:
 
 style main_menu_title:
     properties gui.text_properties("title")
+    size 84
 
 style main_menu_version:
     properties gui.text_properties("version")
+    size 40
 
 
 ## Pantalla del menú del juego #################################################

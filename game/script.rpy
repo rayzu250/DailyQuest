@@ -7,11 +7,20 @@ default current_theme = "bosque"
 
 # Placeholders visuales hasta que exista arte real
 image bg_room = Solid("#1B5E20")
-image guia happy = Solid("#81C784")
+image guia happy = "images/guias/red.png"
+
+transform guia_center:
+    xalign 0.5
+    yalign 1.0
+    yoffset -240
+    zoom 1.5
 
 label start:
+    if not renpy.music.get_playing():
+        play music "audio/Little_Notes_for_Big_Tasks.ogg" fadein 1.0
+
     scene bg_room
-    show guia happy at center
+    show guia happy at guia_center
 
     e "¡Hola! Soy tu guía. ¿Cómo te llamas?"
     $ player_name = renpy.input("Escribe tu nombre:", default="Amigo")

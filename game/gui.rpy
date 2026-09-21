@@ -66,10 +66,10 @@ define gui.name_text_font = "DejaVuSans.ttf"
 define gui.interface_text_font = "DejaVuSans.ttf"
 
 ## El tamaño normal del texto del diálogo.
-define gui.text_size = 19
+define gui.text_size = 38
 
 ## El tamaño de los nombres de los personajes
-define gui.name_text_size = 26
+define gui.name_text_size = 52
 
 ## El tamaño del texto en la interfaz.
 define gui.interface_text_size = 19
@@ -97,7 +97,7 @@ define gui.game_menu_background = "gui/game_menu.png"
 ## línea cada vez.
 
 ## Altura de la caja de texto que contiene el diálogo.
-define gui.textbox_height = 157
+define gui.textbox_height = 230
 
 ## Colocación vertical de la caja de texto en la pantalla. 0.0 para la parte
 ## superior, 0.5 para el centro y 1.0 para la parte inferior.
@@ -107,7 +107,7 @@ define gui.textbox_yalign = 1.0
 ## Colocación del nombre del personaje hablante, relativa a la caja de texto.
 ## Puede ser el númerode píxels desde la esquina superior izquierda, o 0.5 para
 ## centrar.
-define gui.name_xpos = 203
+define gui.name_xpos = 90
 define gui.name_ypos = 0
 
 ## La alineación horizontal del nombre del personaje. (0.0 es izquierda, 0.5 es
@@ -130,11 +130,11 @@ define gui.namebox_tile = False
 
 ## Colocación del diálogo relativa a la caja de texto. Puede ser el número de
 ## píxels relativos a la esquina superor izquierda o 0.5 para centrar.
-define gui.dialogue_xpos = 227
+define gui.dialogue_xpos = 90
 define gui.dialogue_ypos = 43
 
 ## La anchura máxima del texto del diálogo, en píxels.
-define gui.dialogue_width = 628
+define gui.dialogue_width = 900
 
 ## La alineación horizontal del texto del diálogo. (0.0 es izquierda, 0.5 es
 ## centro, 1.0 es derecha).
@@ -190,7 +190,7 @@ define gui.confirm_button_text_xalign = 0.5
 define gui.page_button_borders = Borders(9, 4, 9, 4)
 
 define gui.quick_button_borders = Borders(9, 4, 9, 0)
-define gui.quick_button_text_size = 12
+define gui.quick_button_text_size = 24
 define gui.quick_button_text_idle_color = gui.idle_small_color
 define gui.quick_button_text_selected_color = gui.accent_color
 
@@ -249,7 +249,7 @@ define gui.file_slot_rows = 2
 
 ## Posición del lado izquierdo de los botones de navegación, relativo al lado
 ## izquierdo de la pantalla.
-define gui.navigation_xpos = 34
+define gui.navigation_xpos = 60
 
 ## Posición vertical del indicador de salto.
 define gui.skip_ypos = 9
@@ -261,7 +261,7 @@ define gui.notify_ypos = 38
 define gui.choice_spacing = 19
 
 ## Botones en la sección de navegación del menú principal y el menú del juego.
-define gui.navigation_spacing = 4
+define gui.navigation_spacing = 24
 
 ## Controla el espacio entre preferencias.
 define gui.pref_spacing = 9
@@ -437,15 +437,15 @@ init python:
     def small():
 
         ## Tamaños de letra.
-        gui.text_size = 26
-        gui.name_text_size = 31
+        gui.text_size = 52
+        gui.name_text_size = 62
         gui.notify_text_size = 22
         gui.interface_text_size = 26
         gui.button_text_size = 26
         gui.label_text_size = 29
 
         ## Ajusta la colocación de la caja de texto.
-        gui.textbox_height = 203
+        gui.textbox_height = 300
         gui.name_xpos = 68
         gui.dialogue_xpos = 76
         gui.dialogue_width = 929
@@ -462,7 +462,7 @@ init python:
         gui.history_height = 161
         gui.history_text_width = 583
 
-        gui.quick_button_text_size = 17
+        gui.quick_button_text_size = 28
 
         ## Distribución de botones de archivo.
         gui.file_slot_cols = 2

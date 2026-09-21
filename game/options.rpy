@@ -19,12 +19,12 @@ define config.name = _("DailyQuest")
 ## Determina si el título dado más arriba se muestra en el menú principal.
 ## Ajústalo a 'False' para ocultar el título.
 
-define gui.show_name = True
+define gui.show_name = False
 
 
 ## Versión del juego.
 
-define config.version = "1.0"
+define config.version = "1.1"
 
 
 ## Texto situado en la pantalla 'Acerca de' del juego. Sitúa el texto entre
@@ -62,7 +62,7 @@ define config.has_voice = True
 ## el menú principal. Este archivo seguirá sonando en el juego hasta que sea
 ## detenido o se reproduzca otro archivo.
 
-# define config.main_menu_music = "main-menu-theme.ogg"
+define config.main_menu_music = "audio/Little_Notes_for_Big_Tasks.ogg"
 
 
 ## Transiciones ################################################################
