@@ -12,6 +12,7 @@ default renaming_list = None
 default pick_year = None
 default pick_month = None
 default cal_selected = None
+default show_list_dropdown = False
 
 ################################################################################
 ## Estilos base amigables para niños
@@ -125,36 +126,15 @@ screen view_tasks_screen():
 
     text "Lista: [current_list.capitalize()]" style "todo_text" size 34 xalign 0.5 ypos 115
 
-    # Selector de listas con scroll horizontal
-    hbox:
+    # Selector de listas desplegable
+    $ dd_arrow = " ▴" if show_list_dropdown else " ▾"
+    textbutton "[current_list.capitalize()][dd_arrow]" action ToggleVariable("show_list_dropdown"):
+        style "todo_button"
+        text_style "todo_button_text"
         xalign 0.5
         ypos 170
-        spacing 10
-
-        viewport:
-            xsize 940
-            ysize 96
-            scrollbars "horizontal"
-            draggable True
-            mousewheel "horizontal"
-
-            hbox:
-                spacing 10
-
-                for lname in task_lists:
-                    $ lbg = Frame(Solid("#FFD54F"), 12, 12) if lname == current_list else None
-                    textbutton lname.capitalize() action SetVariable("current_list", lname):
-                        style "todo_button"
-                        text_size 30
-                        xminimum 150
-                        yminimum 62
-                        background lbg
-
-        textbutton "Listas" action Show("lists_screen"):
-            style "todo_button"
-            text_size 30
-            xminimum 150
-            yminimum 62
+        xminimum 460
+        yminimum 80
 
     $ shown = [i for i, t in enumerate(tasks) if t.get("list", task_lists[0]) == current_list]
 
@@ -223,7 +203,42 @@ screen view_tasks_screen():
         spacing 40
 
         textbutton "Volver" action Hide("view_tasks_screen") style "todo_button" text_style "todo_button_text"
-        textbutton "Agregar tarea" action [SetVariable("new_task_list", current_list), Show("add_task_screen")] style "todo_button" text_style "todo_button_text"
+        textbutton "Agregar tarea" action [SetVariable("show_list_dropdown", False), SetVariable("new_task_list", current_list), Show("add_task_screen")] style "todo_button" text_style "todo_button_text"
+
+    # Panel desplegable de listas (al final para que pinte encima de la lista)
+    if show_list_dropdown:
+        frame:
+            background Solid("#2E7D32")
+            padding (16, 16)
+            xalign 0.5
+            ypos 265
+            xmaximum 560
+
+            viewport:
+                xsize 500
+                ysize 420
+                scrollbars "vertical"
+                mousewheel True
+                draggable True
+
+                vbox:
+                    spacing 10
+                    xalign 0.5
+
+                    for lname in task_lists:
+                        $ lbg2 = Frame(Solid("#FFD54F"), 12, 12) if lname == current_list else None
+                        textbutton lname.capitalize() action [SetVariable("current_list", lname), SetVariable("show_list_dropdown", False)]:
+                            style "todo_button"
+                            text_size 32
+                            xminimum 440
+                            yminimum 70
+                            background lbg2
+
+                    textbutton "Listas" action [SetVariable("show_list_dropdown", False), Show("lists_screen")]:
+                        style "todo_button"
+                        text_size 32
+                        xminimum 440
+                        yminimum 70
 
 ################################################################################
 ## Pantalla: Agregar tarea
@@ -362,6 +377,29 @@ screen progress_screen():
         ypos 0.90
 
 ################################################################################
+## Pantalla: Popup de recompensa (fruta + guía)
+################################################################################
+
+screen reward_popup():
+    zorder 100
+
+    # Solo pinta si hay recompensa pendiente (al desmarcar no molesta)
+    if last_reward:
+        add "images/fruits/%s.png" % last_reward:
+            at reward_pop_up
+            xalign 0.5
+            yalign 0.38
+            xysize (192, 192)
+            fit "contain"
+
+        add "images/guias/red.png":
+            at guia_reward_bounce
+            xalign 0.88
+            yalign 1.0
+
+        timer 1.2 action [SetVariable("last_reward", None), Hide("reward_popup")]
+
+################################################################################
 ## Pantalla: Detalles de tarea (subtareas)
 ################################################################################
 
@@ -401,8 +439,10 @@ screen task_detail_screen(i):
                     xalign 0.5
 
                     for j, st in enumerate(substeps):
-                        $ st_mark = "✓  " if st.get("done", False) else "○  "
-                        $ st_color = "#A5D6A7" if st.get("done", False) else "#FFFFFF"
+                        $ is_st_done = st.get("done", False)
+                        # Si está completada, muestra su fruta; si no, la casilla vacía
+                        $ fruit_img = "images/fruits/%s.png" % st["fruit"] if (is_st_done and st.get("fruit")) else None
+                        $ st_color = "#A5D6A7" if is_st_done else "#FFFFFF"
                         $ sdl = st.get("deadline")
                         $ sdc = subtask_deadline_color(st)
 
@@ -413,11 +453,20 @@ screen task_detail_screen(i):
 
                             hbox:
                                 spacing 12
-                                textbutton "[st_mark][st.get('text', '')]" action Function(toggle_subtask, i, j):
+                                if fruit_img:
+                                    add fruit_img:
+                                        xysize (56, 56)
+                                        fit "contain"
+                                        yalign 0.5
+                                else:
+                                    fixed:
+                                        xysize (56, 56)
+                                        text "○" style "subtask_text" xalign 0.5 yalign 0.5
+                                textbutton "[st.get('text', '')]" action [Function(toggle_subtask, i, j), Show("reward_popup")]:
                                     style "subtask_button"
                                     text_style "subtask_text"
                                     text_color st_color
-                                    xminimum 400
+                                    xminimum 360
                                 if valid_date(sdl):
                                     text date_tuple_to_string(sdl) style "subtask_text" size 28 color (sdc or "#81C784") xalign 0.5 xminimum 110
                                 textbutton "Fecha" action Show("deadline_pick_screen", i=i, j=j):

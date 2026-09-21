@@ -8,9 +8,16 @@ init offset = -3
 default task_lists = ["General"]
 default current_list = "General"
 
+# Última fruta ganada (recompensa pendiente de mostrar en el popup)
+default last_reward = None
+
 init python:
     import datetime as _dt
     import calendar as _cal
+    import random
+
+    # Frutas de recompensa (iconos en game/images/fruits/)
+    FRUITS = ["apple", "banana", "coconut", "grapes", "strawberry", "watermelon"]
 
     # Nombres de los meses en español
     MONTHS_ES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
@@ -53,13 +60,26 @@ init python:
     def add_subtask(task_index, text):
         text = text.strip()
         if text and 0 <= task_index < len(store.tasks):
-            store.tasks[task_index].setdefault("subtasks", []).append({"text": text, "done": False, "deadline": None})
+            store.tasks[task_index].setdefault("subtasks", []).append({"text": text, "done": False, "deadline": None, "fruit": None})
             renpy.notify("¡Subtarea agregada!")
 
     def toggle_subtask(task_index, subtask_index):
+        if not (0 <= task_index < len(store.tasks)):
+            return
         steps = store.tasks[task_index].get("subtasks", [])
         if 0 <= subtask_index < len(steps):
-            steps[subtask_index]["done"] = not steps[subtask_index]["done"]
+            st = steps[subtask_index]
+            new_state = not st.get("done", False)
+            st["done"] = new_state
+            if new_state:
+                # Asigna fruta si no tiene una previa
+                if not st.get("fruit"):
+                    st["fruit"] = random.choice(FRUITS)
+                store.last_reward = st["fruit"]
+                renpy.notify("¡Conseguiste una fruta!")
+                renpy.sound.play("audio/reward_ding.ogg")
+            else:
+                store.last_reward = None
 
     def remove_subtask(task_index, subtask_index):
         steps = store.tasks[task_index].get("subtasks", [])
@@ -180,6 +200,15 @@ init python:
                         s["deadline"] = tuple(d)
 
     config.after_load_callbacks.append(_migrate_deadlines)
+
+    # Asegura los campos nuevos de subtarea en partidas guardadas viejas
+    def _migrate_subtask_fields():
+        for t in store.tasks:
+            for s in t.get("subtasks", []):
+                s.setdefault("deadline", None)
+                s.setdefault("fruit", None)
+
+    config.after_load_callbacks.append(_migrate_subtask_fields)
 
     def is_overdue(task):
         d = task.get("deadline")
