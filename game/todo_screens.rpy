@@ -11,6 +11,7 @@ default new_list_name = ""
 default renaming_list = None
 default pick_year = None
 default pick_month = None
+default cal_selected = None
 
 ################################################################################
 ## Estilos base amigables para niños
@@ -102,6 +103,7 @@ screen main_todo():
 
         textbutton "Ver mis tareas" action Show("view_tasks_screen") style "todo_button" text_style "todo_button_text"
         textbutton "Agregar nueva tarea" action Show("add_task_screen") style "todo_button" text_style "todo_button_text"
+        textbutton "Ver calendario" action [SetVariable("pick_year", None), SetVariable("pick_month", None), SetVariable("cal_selected", None), Show("calendar_screen")] style "todo_button" text_style "todo_button_text"
         textbutton "Cambiar tema" action Show("theme_screen") style "todo_button" text_style "todo_button_text"
         textbutton "Ver mi progreso" action Show("progress_screen") style "todo_button" text_style "todo_button_text"
 
@@ -603,5 +605,116 @@ screen deadline_pick_screen(i):
         ypos 780
 
     textbutton "Volver" action Hide("deadline_pick_screen") style "todo_button" text_style "todo_button_text":
+        xalign 0.5
+        ypos 0.90
+
+################################################################################
+## Pantalla: Calendario
+################################################################################
+
+screen calendar_screen():
+    modal True
+
+    add Solid(themes[current_theme]["bg"])
+
+    text "Mi Calendario" style "todo_title" xalign 0.5 ypos 40
+
+    $ cy = pick_year if pick_year else today_tuple()[0]
+    $ cm = pick_month if pick_month else today_tuple()[1]
+    $ grid = month_grid(cy, cm)
+    $ sel = cal_selected if valid_date(cal_selected) else today_tuple()
+
+    text "[MONTHS_ES[cm-1]] [cy]" style "todo_text" size 34 bold True xalign 0.5 ypos 100
+
+    hbox:
+        xalign 0.5
+        ypos 155
+        spacing 30
+
+        textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
+            xminimum 150
+        textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
+            xminimum 150
+        textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
+            xminimum 150
+
+    hbox:
+        xalign 0.5
+        ypos 220
+        spacing 8
+
+        for wd in WEEKDAYS_ES:
+            text wd style "todo_text" size 26 xalign 0.5 xsize 100
+
+    vbox:
+        xalign 0.5
+        ypos 255
+        spacing 7
+
+        for week in grid:
+            hbox:
+                spacing 8
+                xalign 0.5
+
+                for d in week:
+                    $ dkey = (d.year, d.month, d.day)
+                    $ in_month = d.month == cm
+                    $ is_today = dkey == today_tuple()
+                    $ is_sel = dkey == sel
+                    $ n_dl = sum(1 for t in tasks if t.get("deadline") == dkey)
+                    $ dlabel = ("%d" % d.day) + (("  ·%d" % n_dl) if n_dl else "")
+                    $ d_bg = "#26A69ACC" if is_sel else ("#4CAF5088" if n_dl else ("#FFD54F44" if is_today else ("#FFFFFF33" if in_month else "#FFFFFF11")))
+                    $ d_tcolor = "#FFD54F" if (is_sel or is_today) else ("#FFFFFF55" if not in_month else "#FFFFFF")
+
+                    textbutton dlabel:
+                        action SetVariable("cal_selected", dkey)
+                        background d_bg
+                        style "cal_day"
+                        text_style "cal_day_text"
+                        text_color d_tcolor
+                        xsize 100
+                        ysize 64
+
+    $ sel_title = "Tareas del %d de %s" % (sel[2], MONTHS_ES[sel[1] - 1])
+
+    text "[sel_title]" style "todo_text" size 28 xalign 0.5 ypos 730
+
+    $ sel_tasks = [(idx, t) for idx, t in enumerate(tasks) if t.get("deadline") == sel]
+
+    if not sel_tasks:
+        text "No hay tareas para este día." style "todo_text" xalign 0.5 ypos 780
+    else:
+        viewport:
+            xalign 0.5
+            ypos 780
+            xsize 900
+            ysize 380
+            scrollbars "vertical"
+            mousewheel True
+            draggable True
+
+            vbox:
+                spacing 18
+                xalign 0.5
+
+                for idx, t in sel_tasks:
+                    $ c_status = "#A5D6A7" if t["done"] else "#FFFFFF"
+
+                    frame:
+                        background Solid("#FFFFFF22")
+                        padding (20, 14)
+                        xminimum 850
+
+                        hbox:
+                            spacing 15
+                            text "[t['title']]" style "task_item" color c_status
+                            text "· [t.get('list', task_lists[0]).capitalize()]" style "task_item" size 22 color "#B9F6CA"
+                            textbutton "Abrir" action Show("task_detail_screen", i=idx):
+                                style "todo_button"
+                                text_size 22
+                                xminimum 130
+                                yminimum 46
+
+    textbutton "Volver" action Hide("calendar_screen") style "todo_button" text_style "todo_button_text":
         xalign 0.5
         ypos 0.90
