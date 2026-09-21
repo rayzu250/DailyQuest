@@ -20,13 +20,13 @@ default cal_selected = None
 style todo_button:
     background Frame(Solid("#FFFFFF"), 12, 12)
     hover_background Frame(Solid("#E8F5E9"), 12, 12)
-    padding (30, 20)
-    xminimum 400
-    yminimum 70
+    padding (42, 28)
+    xminimum 460
+    yminimum 94
     size_group "todo_buttons"
 
 style todo_button_text:
-    size 32
+    size 42
     color "#212121"
     hover_color "#1B5E20"
     font "DejaVuSans.ttf"          # Cambia por la fuente que uses
@@ -35,31 +35,31 @@ style todo_button_text:
     yalign 0.5
 
 style todo_title:
-    size 48
+    size 64
     color "#FFFFFF"
     bold True
     textalign 0.5
     outlines [(3, "#00000080", 0, 0)]
 
 style todo_text:
-    size 30
+    size 40
     color "#FFFFFF"
     textalign 0.5
     outlines [(2, "#00000060", 0, 0)]
 
 style task_item:
-    size 28
+    size 38
     color "#FFFFFF"
     outlines [(2, "#00000050", 0, 0)]
 
 style subtask_button:
     background Solid("#FFFFFF22")
     hover_background Solid("#FFFFFF44")
-    padding (15, 12)
-    xminimum 600
+    padding (22, 16)
+    xminimum 640
 
 style subtask_text:
-    size 28
+    size 38
     color "#FFFFFF"
 
 style cal_day:
@@ -67,7 +67,7 @@ style cal_day:
     hover_background Solid("#FFFFFF55")
 
 style cal_day_text:
-    size 26
+    size 34
     color "#FFFFFF"
 
 ################################################################################
@@ -82,24 +82,24 @@ screen main_todo():
     add Solid(themes[current_theme]["bg"])
 
     # Título
-    text "¡Mis Proyectos!" style "todo_title" xalign 0.5 ypos 60
+    text "¡Mis Proyectos!" style "todo_title" xalign 0.5 ypos 55
 
     # Nombre del niño
-    text "Hola [player_name]!" style "todo_text" xalign 0.5 ypos 130
+    text "Hola [player_name]!" style "todo_text" xalign 0.5 ypos 150
 
     # Contador de estrellas
     hbox:
         xalign 0.5
-        ypos 190
+        ypos 230
         spacing 15
-        text "★" size 40 color "#FFD700"
-        text "[completed_tasks] estrellas" style "todo_text" size 28
+        text "★" size 52 color "#FFD700"
+        text "[completed_tasks] estrellas" style "todo_text"
 
     # Botones principales
     vbox:
         xalign 0.5
         yalign 0.55
-        spacing 25
+        spacing 28
 
         textbutton "Ver mis tareas" action Show("view_tasks_screen") style "todo_button" text_style "todo_button_text"
         textbutton "Agregar nueva tarea" action Show("add_task_screen") style "todo_button" text_style "todo_button_text"
@@ -121,41 +121,41 @@ screen view_tasks_screen():
 
     add Solid(themes[current_theme]["bg"])
 
-    text "Mis Tareas" style "todo_title" xalign 0.5 ypos 40
+    text "Mis Tareas" style "todo_title" xalign 0.5 ypos 35
 
-    text "Lista: [current_list.capitalize()]" style "todo_text" size 26 xalign 0.5 ypos 100
+    text "Lista: [current_list.capitalize()]" style "todo_text" size 34 xalign 0.5 ypos 115
 
     # Selector de listas
     hbox:
         xalign 0.5
-        ypos 145
+        ypos 170
         spacing 10
 
         for lname in task_lists:
             textbutton lname.capitalize() action SetVariable("current_list", lname):
                 style "todo_button"
-                text_size 22
-                xminimum 120
-                yminimum 46
+                text_size 30
+                xminimum 140
+                yminimum 62
 
         textbutton "Listas" action Show("lists_screen"):
             style "todo_button"
-            text_size 24
-            xminimum 120
-            yminimum 46
+            text_size 30
+            xminimum 140
+            yminimum 62
 
     $ shown = [i for i, t in enumerate(tasks) if t.get("list", task_lists[0]) == current_list]
 
     if not tasks:
-        text "¡Todavía no tienes tareas!\nAgrega una para empezar tu aventura." style "todo_text" xalign 0.5 ypos 320
+        text "¡Todavía no tienes tareas!\nAgrega una para empezar tu aventura." style "todo_text" xalign 0.5 ypos 400
     elif not shown:
-        text "Esta lista aún está vacía.\n¡Agrega una tarea aquí!" style "todo_text" xalign 0.5 ypos 320
+        text "Esta lista aún está vacía.\n¡Agrega una tarea aquí!" style "todo_text" xalign 0.5 ypos 400
     else:
         viewport:
             xalign 0.5
-            ypos 205
+            ypos 245
             xsize 900
-            ysize 500
+            ysize 480
             scrollbars "vertical"
             mousewheel True
             draggable True
@@ -174,27 +174,35 @@ screen view_tasks_screen():
 
                     frame:
                         background Solid("#FFFFFF22")
-                        padding (25, 18)
+                        padding (25, 20)
                         xminimum 850
 
-                        hbox:
-                            spacing 20
-                            text "[status][t['title']]" style "task_item" color color_status
-                            if sp:
-                                text "[sp[0]]/[sp[1]]" style "task_item" size 24 color "#81C784" xalign 0.5 xminimum 70
-                            if dl:
-                                text date_tuple_to_string(dl) style "task_item" size 22 color (dcolor or "#81C784") xalign 0.5 xminimum 90
-                            if not t["done"]:
-                                textbutton "Completar" action Function(complete_task, i):
+                        vbox:
+                            spacing 14
+
+                            hbox:
+                                spacing 20
+                                text "[status][t['title']]" style "task_item" color color_status xmaximum 500
+                                if sp:
+                                    text "[sp[0]]/[sp[1]]" style "task_item" size 30 color "#81C784" xalign 0.5 xminimum 70
+                                if dl:
+                                    text date_tuple_to_string(dl) style "task_item" size 28 color (dcolor or "#81C784") xalign 0.5 xminimum 110
+
+                            hbox:
+                                spacing 20
+                                xalign 1.0
+
+                                if not t["done"]:
+                                    textbutton "Completar" action Function(complete_task, i):
+                                        style "todo_button"
+                                        text_size 34
+                                        xminimum 230
+                                        yminimum 72
+                                textbutton "Detalles" action Show("task_detail_screen", i=i):
                                     style "todo_button"
-                                    text_size 24
-                                    xminimum 160
-                                    yminimum 50
-                            textbutton "Detalles" action Show("task_detail_screen", i=i):
-                                style "todo_button"
-                                text_size 24
-                                xminimum 170
-                                yminimum 50
+                                    text_size 34
+                                    xminimum 230
+                                    yminimum 72
 
     # Botones inferiores
     hbox:
@@ -218,40 +226,40 @@ screen add_task_screen():
 
     text "Nueva Tarea / Proyecto" style "todo_title" xalign 0.5 ypos 70
 
-    text "¿Qué quieres lograr?" style "todo_text" xalign 0.5 ypos 170
+    text "¿Qué quieres lograr?" style "todo_text" xalign 0.5 ypos 200
 
     frame:
         background Solid("#00000040")
         padding (20, 15)
         xalign 0.5
-        ypos 240
-        xmaximum 700
+        ypos 280
+        xmaximum 760
 
         input:
             value VariableInputValue("new_title")
             length 40
-            size 34
+            size 40
             color "#FFFFFF"
             xalign 0.0
             yalign 0.5
 
-    text "¿En qué lista?" style "todo_text" xalign 0.5 ypos 360
+    text "¿En qué lista?" style "todo_text" xalign 0.5 ypos 430
 
     hbox:
         xalign 0.5
-        ypos 400
+        ypos 490
         spacing 12
 
         for lname in task_lists:
             textbutton lname.capitalize() action SetVariable("new_task_list", lname):
                 style "todo_button"
-                text_size 22
-                xminimum 150
-                yminimum 50
+                text_size 30
+                xminimum 180
+                yminimum 66
 
     hbox:
         xalign 0.5
-        ypos 520
+        ypos 660
         spacing 50
 
         textbutton "Guardar":
@@ -308,18 +316,18 @@ screen progress_screen():
         spacing 30
 
         text "Tareas completadas: [done] / [total]" style "todo_text"
-        text "Estrellas ganadas: [completed_tasks]" style "todo_text" size 36
+        text "Estrellas ganadas: [completed_tasks]" style "todo_text" size 46
 
         # Barra de progreso simple
         fixed:
-            xsize 600
-            ysize 40
+            xsize 720
+            ysize 56
             xalign 0.5
 
             add Solid("#FFFFFF40")
-            add Solid(themes[current_theme]["accent"]) xsize int(600 * percent / 100)
+            add Solid(themes[current_theme]["accent"]) xsize int(720 * percent / 100)
 
-        text "[percent]%" style "todo_text" size 40
+        text "[percent]%" style "todo_text" size 52
 
         if percent == 100 and total > 0:
             text "¡Eres un campeón de los proyectos!" style "todo_text" color "#FFD700"
@@ -351,18 +359,18 @@ screen task_detail_screen(i):
             xalign 0.5
             ypos 0.90
     else:
-        text "[t['title']]" style "todo_text" size 36 bold True xalign 0.5 ypos 110
+        text "[t['title']]" style "todo_text" size 44 bold True xalign 0.5 ypos 140
 
         $ substeps = t.get("subtasks", [])
 
         if not substeps:
-            text "Aún no tiene subtareas.\n¡Divide la tarea en pasos divertidos!" style "todo_text" xalign 0.5 ypos 220
+            text "Aún no tiene subtareas.\n¡Divide la tarea en pasos divertidos!" style "todo_text" xalign 0.5 ypos 260
         else:
             viewport:
                 xalign 0.5
-                ypos 220
+                ypos 260
                 xsize 900
-                ysize 520
+                ysize 460
                 scrollbars "vertical"
                 mousewheel True
                 draggable True
@@ -377,7 +385,7 @@ screen task_detail_screen(i):
 
                         frame:
                             background Solid("#FFFFFF22")
-                            padding (20, 14)
+                            padding (20, 16)
                             xminimum 850
 
                             hbox:
@@ -388,22 +396,22 @@ screen task_detail_screen(i):
                                     text_color st_color
                                 textbutton "✕" action Function(remove_subtask, i, j):
                                     style "todo_button"
-                                    text_size 22
-                                    xminimum 90
-                                    yminimum 50
+                                    text_size 30
+                                    xminimum 110
+                                    yminimum 64
 
         # Entrada para agregar subtarea
         frame:
             background Solid("#00000040")
             padding (20, 15)
             xalign 0.5
-            ypos 780
-            xmaximum 700
+            ypos 760
+            xmaximum 760
 
             input:
                 value VariableInputValue("new_subtask")
                 length 60
-                size 34
+                size 40
                 color "#FFFFFF"
                 xalign 0.0
                 yalign 0.5
@@ -415,11 +423,11 @@ screen task_detail_screen(i):
         # Fecha límite
         $ deadline_text = date_tuple_to_string(t.get("deadline"))
 
-        text "Fecha límite: [deadline_text]" style "todo_text" size 30 xalign 0.5 ypos 980
+        text "Fecha límite: [deadline_text]" style "todo_text" size 38 xalign 0.5 ypos 1020
 
         hbox:
             xalign 0.5
-            ypos 1040
+            ypos 1100
             spacing 20
 
             textbutton "Cambiar" action Show("deadline_pick_screen", i=i) style "todo_button" text_style "todo_button_text"
@@ -442,9 +450,9 @@ screen lists_screen():
 
     viewport:
         xalign 0.5
-        ypos 140
+        ypos 150
         xsize 900
-        ysize 380
+        ysize 420
         scrollbars "vertical"
         mousewheel True
         draggable True
@@ -456,46 +464,53 @@ screen lists_screen():
             for lname in task_lists:
                 frame:
                     background Solid("#FFFFFF22")
-                    padding (20, 14)
+                    padding (20, 16)
                     xminimum 850
 
-                    hbox:
-                        spacing 15
+                    vbox:
+                        spacing 12
+
                         textbutton lname.capitalize() action [SetVariable("current_list", lname), Hide("lists_screen")]:
                             style "subtask_button"
                             text_style "subtask_text"
-                        textbutton "Renombrar" action [SetVariable("renaming_list", lname), SetVariable("new_list_name", lname)]:
-                            style "todo_button"
-                            text_size 22
-                            xminimum 130
-                            yminimum 46
-                        textbutton "✕" action Function(delete_task_list, lname):
-                            style "todo_button"
-                            text_size 22
-                            xminimum 90
-                            yminimum 46
+                            xminimum 460
+
+                        hbox:
+                            spacing 20
+                            xalign 1.0
+
+                            textbutton "Renombrar" action [SetVariable("renaming_list", lname), SetVariable("new_list_name", lname)]:
+                                style "todo_button"
+                                text_size 30
+                                xminimum 190
+                                yminimum 64
+                            textbutton "✕" action Function(delete_task_list, lname):
+                                style "todo_button"
+                                text_size 30
+                                xminimum 110
+                                yminimum 64
 
     if renaming_list:
-        text "Renombrando: [renaming_list]" style "todo_text" size 26 xalign 0.5 ypos 560
+        text "Renombrando: [renaming_list]" style "todo_text" size 32 xalign 0.5 ypos 620
 
         frame:
             background Solid("#00000040")
             padding (20, 15)
             xalign 0.5
-            ypos 600
-            xmaximum 700
+            ypos 680
+            xmaximum 760
 
             input:
                 value VariableInputValue("new_list_name")
                 length 30
-                size 32
+                size 36
                 color "#FFFFFF"
                 xalign 0.0
                 yalign 0.5
 
         hbox:
             xalign 0.5
-            ypos 690
+            ypos 800
             spacing 30
 
             textbutton "Guardar nombre":
@@ -508,19 +523,19 @@ screen lists_screen():
                 style "todo_button"
                 text_style "todo_button_text"
     else:
-        text "Crea una nueva lista" style "todo_text" size 26 xalign 0.5 ypos 560
+        text "Crea una nueva lista" style "todo_text" size 32 xalign 0.5 ypos 620
 
         frame:
             background Solid("#00000040")
             padding (20, 15)
             xalign 0.5
-            ypos 600
-            xmaximum 700
+            ypos 680
+            xmaximum 760
 
             input:
                 value VariableInputValue("new_list_name")
                 length 30
-                size 32
+                size 36
                 color "#FFFFFF"
                 xalign 0.0
                 yalign 0.5
@@ -530,7 +545,7 @@ screen lists_screen():
             style "todo_button"
             text_style "todo_button_text"
             xalign 0.5
-            ypos 690
+            ypos 800
 
     textbutton "Volver" action Hide("lists_screen") style "todo_button" text_style "todo_button_text":
         xalign 0.5
@@ -551,31 +566,31 @@ screen deadline_pick_screen(i):
     $ cm = pick_month if pick_month else today_tuple()[1]
     $ grid = month_grid(cy, cm)
 
-    text "[MONTHS_ES[cm-1]] [cy]" style "todo_text" size 34 bold True xalign 0.5 ypos 105
+    text "[MONTHS_ES[cm-1]] [cy]" style "todo_text" size 42 bold True xalign 0.5 ypos 115
 
     hbox:
         xalign 0.5
-        ypos 165
+        ypos 190
         spacing 30
 
         textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 150
+            xminimum 190
         textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 150
+            xminimum 190
         textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 150
+            xminimum 190
 
     hbox:
         xalign 0.5
-        ypos 230
+        ypos 260
         spacing 8
 
         for wd in WEEKDAYS_ES:
-            text wd style "todo_text" size 26 xalign 0.5 xsize 100
+            text wd style "todo_text" size 34 xalign 0.5 xsize 120
 
     vbox:
         xalign 0.5
-        ypos 265
+        ypos 300
         spacing 8
 
         for week in grid:
@@ -597,12 +612,12 @@ screen deadline_pick_screen(i):
                         style "cal_day"
                         text_style "cal_day_text"
                         text_color d_tcolor
-                        xsize 100
-                        ysize 70
+                        xsize 120
+                        ysize 76
 
     textbutton "Quitar fecha" action [Function(set_deadline, i, None), Hide("deadline_pick_screen")] style "todo_button" text_style "todo_button_text":
         xalign 0.5
-        ypos 780
+        ypos 850
 
     textbutton "Volver" action Hide("deadline_pick_screen") style "todo_button" text_style "todo_button_text":
         xalign 0.5
@@ -624,31 +639,31 @@ screen calendar_screen():
     $ grid = month_grid(cy, cm)
     $ sel = cal_selected if valid_date(cal_selected) else today_tuple()
 
-    text "[MONTHS_ES[cm-1]] [cy]" style "todo_text" size 34 bold True xalign 0.5 ypos 100
+    text "[MONTHS_ES[cm-1]] [cy]" style "todo_text" size 42 bold True xalign 0.5 ypos 115
 
     hbox:
         xalign 0.5
-        ypos 155
+        ypos 190
         spacing 30
 
         textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 150
+            xminimum 190
         textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 150
+            xminimum 190
         textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 150
+            xminimum 190
 
     hbox:
         xalign 0.5
-        ypos 220
+        ypos 252
         spacing 8
 
         for wd in WEEKDAYS_ES:
-            text wd style "todo_text" size 26 xalign 0.5 xsize 100
+            text wd style "todo_text" size 34 xalign 0.5 xsize 120
 
     vbox:
         xalign 0.5
-        ypos 255
+        ypos 296
         spacing 7
 
         for week in grid:
@@ -672,23 +687,23 @@ screen calendar_screen():
                         style "cal_day"
                         text_style "cal_day_text"
                         text_color d_tcolor
-                        xsize 100
-                        ysize 64
+                        xsize 120
+                        ysize 70
 
     $ sel_title = "Tareas del %d de %s" % (sel[2], MONTHS_ES[sel[1] - 1])
 
-    text "[sel_title]" style "todo_text" size 28 xalign 0.5 ypos 730
+    text "[sel_title]" style "todo_text" size 36 xalign 0.5 ypos 800
 
     $ sel_tasks = [(idx, t) for idx, t in enumerate(tasks) if t.get("deadline") == sel]
 
     if not sel_tasks:
-        text "No hay tareas para este día." style "todo_text" xalign 0.5 ypos 780
+        text "No hay tareas para este día." style "todo_text" xalign 0.5 ypos 845
     else:
         viewport:
             xalign 0.5
-            ypos 780
+            ypos 845
             xsize 900
-            ysize 380
+            ysize 420
             scrollbars "vertical"
             mousewheel True
             draggable True
@@ -702,18 +717,18 @@ screen calendar_screen():
 
                     frame:
                         background Solid("#FFFFFF22")
-                        padding (20, 14)
+                        padding (20, 16)
                         xminimum 850
 
                         hbox:
                             spacing 15
-                            text "[t['title']]" style "task_item" color c_status
-                            text "· [t.get('list', task_lists[0]).capitalize()]" style "task_item" size 22 color "#B9F6CA"
+                            text "[t['title']]" style "task_item" color c_status xmaximum 420
+                            text "· [t.get('list', task_lists[0]).capitalize()]" style "task_item" size 30 color "#B9F6CA" xmaximum 130
                             textbutton "Abrir" action Show("task_detail_screen", i=idx):
                                 style "todo_button"
-                                text_size 22
-                                xminimum 130
-                                yminimum 46
+                                text_size 30
+                                xminimum 150
+                                yminimum 66
 
     textbutton "Volver" action Hide("calendar_screen") style "todo_button" text_style "todo_button_text":
         xalign 0.5
