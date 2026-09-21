@@ -9,6 +9,14 @@ default task_lists = ["General"]
 default current_list = "General"
 
 init python:
+    import datetime as _dt
+    import calendar as _cal
+
+    # Nombres de los meses en español
+    MONTHS_ES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    MONTHS_SHORT_ES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"]
+    WEEKDAYS_ES = ["L", "M", "X", "J", "V", "S", "D"]
+
     # Crea una nueva tarea con todos los campos del modelo
     def new_task(title, task_list=None, priority=1):
         return {
@@ -92,3 +100,63 @@ init python:
             if store.current_list == name:
                 store.current_list = default_list
             renpy.notify("Lista eliminada")
+
+    # --- Fechas y deadlines ---
+
+    def today_tuple():
+        today = _dt.date.today()
+        return (today.year, today.month, today.day)
+
+    def valid_date(d):
+        return isinstance(d, (tuple, list)) and len(d) == 3
+
+    def date_tuple_to_string(d):
+        if not valid_date(d):
+            return "Sin fecha"
+        return "%d %s" % (d[2], MONTHS_SHORT_ES[d[1] - 1])
+
+    # Devuelve una matriz de semanas (cada semana es una fila de 7 fechas)
+    def month_grid(year, month):
+        return _cal.Calendar(firstweekday=0).monthdatescalendar(year, month)
+
+    def set_deadline(task_index, dtuple):
+        if 0 <= task_index < len(store.tasks):
+            store.tasks[task_index]["deadline"] = dtuple
+            renpy.notify("Fecha límite actualizada" if dtuple else "Fecha límite eliminada")
+
+    def is_overdue(task):
+        d = task.get("deadline")
+        if not valid_date(d):
+            return False
+        t = today_tuple()
+        return (d[0], d[1], d[2]) < (t[0], t[1], t[2])
+
+    def deadline_color(task):
+        d = task.get("deadline")
+        if not valid_date(d):
+            return None
+        if is_overdue(task):
+            return "#EF5350"
+        if d == today_tuple():
+            return "#FFD54F"
+        return "#81C784"
+
+    # --- Navegación del selector/calendario ---
+
+    def month_move(delta):
+        y = store.pick_year if store.pick_year else today_tuple()[0]
+        m = store.pick_month if store.pick_month else today_tuple()[1]
+        m += delta
+        while m < 1:
+            m += 12
+            y -= 1
+        while m > 12:
+            m -= 12
+            y += 1
+        store.pick_year = y
+        store.pick_month = m
+
+    def set_pick_today():
+        t = today_tuple()
+        store.pick_year = t[0]
+        store.pick_month = t[1]

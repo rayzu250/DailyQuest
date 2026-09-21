@@ -9,6 +9,8 @@ default new_subtask = ""
 default new_task_list = "General"
 default new_list_name = ""
 default renaming_list = None
+default pick_year = None
+default pick_month = None
 
 ################################################################################
 ## Estilos base amigables para niños
@@ -57,6 +59,14 @@ style subtask_button:
 
 style subtask_text:
     size 28
+    color "#FFFFFF"
+
+style cal_day:
+    background Solid("#FFFFFF22")
+    hover_background Solid("#FFFFFF55")
+
+style cal_day_text:
+    size 26
     color "#FFFFFF"
 
 ################################################################################
@@ -157,6 +167,8 @@ screen view_tasks_screen():
                     $ status = "✓  " if t["done"] else "○  "
                     $ color_status = "#A5D6A7" if t["done"] else "#FFFFFF"
                     $ sp = subtask_progress(t)
+                    $ dl = t.get("deadline")
+                    $ dcolor = deadline_color(t)
 
                     frame:
                         background Solid("#FFFFFF22")
@@ -168,6 +180,8 @@ screen view_tasks_screen():
                             text "[status][t['title']]" style "task_item" color color_status
                             if sp:
                                 text "[sp[0]]/[sp[1]]" style "task_item" size 24 color "#81C784" xalign 0.5 xminimum 70
+                            if dl:
+                                text date_tuple_to_string(dl) style "task_item" size 22 color (dcolor or "#81C784") xalign 0.5 xminimum 90
                             if not t["done"]:
                                 textbutton "Completar" action Function(complete_task, i):
                                     style "todo_button"
@@ -396,6 +410,19 @@ screen task_detail_screen(i):
             xalign 0.5
             ypos 880
 
+        # Fecha límite
+        $ deadline_text = date_tuple_to_string(t.get("deadline"))
+
+        text "Fecha límite: [deadline_text]" style "todo_text" size 30 xalign 0.5 ypos 980
+
+        hbox:
+            xalign 0.5
+            ypos 1040
+            spacing 20
+
+            textbutton "Cambiar" action Show("deadline_pick_screen", i=i) style "todo_button" text_style "todo_button_text"
+            textbutton "Quitar" action Function(set_deadline, i, None) style "todo_button" text_style "todo_button_text"
+
         textbutton "Volver" action Hide("task_detail_screen") style "todo_button" text_style "todo_button_text":
             xalign 0.5
             ypos 0.90
@@ -504,5 +531,77 @@ screen lists_screen():
             ypos 690
 
     textbutton "Volver" action Hide("lists_screen") style "todo_button" text_style "todo_button_text":
+        xalign 0.5
+        ypos 0.90
+
+################################################################################
+## Pantalla: Elegir fecha límite
+################################################################################
+
+screen deadline_pick_screen(i):
+    modal True
+
+    add Solid(themes[current_theme]["bg"])
+
+    text "Elige la fecha límite" style "todo_title" xalign 0.5 ypos 40
+
+    $ cy = pick_year if pick_year else today_tuple()[0]
+    $ cm = pick_month if pick_month else today_tuple()[1]
+    $ grid = month_grid(cy, cm)
+
+    text "[MONTHS_ES[cm-1]] [cy]" style "todo_text" size 34 bold True xalign 0.5 ypos 105
+
+    hbox:
+        xalign 0.5
+        ypos 165
+        spacing 30
+
+        textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
+            xminimum 150
+        textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
+            xminimum 150
+        textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
+            xminimum 150
+
+    hbox:
+        xalign 0.5
+        ypos 230
+        spacing 8
+
+        for wd in WEEKDAYS_ES:
+            text wd style "todo_text" size 26 xalign 0.5 xsize 100
+
+    vbox:
+        xalign 0.5
+        ypos 265
+        spacing 8
+
+        for week in grid:
+            hbox:
+                spacing 8
+                xalign 0.5
+
+                for d in week:
+                    $ dkey = (d.year, d.month, d.day)
+                    $ in_month = d.month == cm
+                    $ is_today = dkey == today_tuple()
+                    $ has_dl = any(t.get("deadline") == dkey for t in tasks)
+                    $ d_bg = "#4CAF5088" if has_dl else ("#FFFFFF33" if in_month else "#FFFFFF11")
+                    $ d_tcolor = "#FFD54F" if is_today else ("#FFFFFF55" if not in_month else "#FFFFFF")
+
+                    textbutton str(d.day):
+                        action Function(set_deadline, i, dkey)
+                        background d_bg
+                        style "cal_day"
+                        text_style "cal_day_text"
+                        text_color d_tcolor
+                        xsize 100
+                        ysize 70
+
+    textbutton "Quitar fecha" action [Function(set_deadline, i, None), Hide("deadline_pick_screen")] style "todo_button" text_style "todo_button_text":
+        xalign 0.5
+        ypos 780
+
+    textbutton "Volver" action Hide("deadline_pick_screen") style "todo_button" text_style "todo_button_text":
         xalign 0.5
         ypos 0.90
