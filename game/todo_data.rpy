@@ -31,3 +31,30 @@ init python:
             store.tasks[index]["done"] = True
             store.completed_tasks += 1
             renpy.notify("¡Bien hecho! +1 estrella ★")
+
+    # --- Subtareas ---
+
+    # Devuelve (completadas, total) o None si la tarea no tiene subtareas
+    def subtask_progress(task):
+        steps = task.get("subtasks", [])
+        if not steps:
+            return None
+        done = sum(1 for s in steps if s.get("done", False))
+        return (done, len(steps))
+
+    def add_subtask(task_index, text):
+        text = text.strip()
+        if text and 0 <= task_index < len(store.tasks):
+            store.tasks[task_index].setdefault("subtasks", []).append({"text": text, "done": False})
+            renpy.notify("¡Subtarea agregada!")
+
+    def toggle_subtask(task_index, subtask_index):
+        steps = store.tasks[task_index].get("subtasks", [])
+        if 0 <= subtask_index < len(steps):
+            steps[subtask_index]["done"] = not steps[subtask_index]["done"]
+
+    def remove_subtask(task_index, subtask_index):
+        steps = store.tasks[task_index].get("subtasks", [])
+        if 0 <= subtask_index < len(steps):
+            steps.pop(subtask_index)
+            renpy.notify("Subtarea eliminada")

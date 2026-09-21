@@ -5,6 +5,7 @@
 init offset = -1
 
 default new_title = ""
+default new_subtask = ""
 
 ################################################################################
 ## Estilos base amigables para niños
@@ -44,6 +45,16 @@ style task_item:
     size 28
     color "#FFFFFF"
     outlines [(2, "#00000050", 0, 0)]
+
+style subtask_button:
+    background Solid("#FFFFFF22")
+    hover_background Solid("#FFFFFF44")
+    padding (15, 12)
+    xminimum 600
+
+style subtask_text:
+    size 28
+    color "#FFFFFF"
 
 ################################################################################
 ## Pantalla principal (Main Menu ToDo)
@@ -116,6 +127,7 @@ screen view_tasks_screen():
                 for i, t in enumerate(tasks):
                     $ status = "✓  " if t["done"] else "○  "
                     $ color_status = "#A5D6A7" if t["done"] else "#FFFFFF"
+                    $ sp = subtask_progress(t)
 
                     frame:
                         background Solid("#FFFFFF22")
@@ -125,12 +137,19 @@ screen view_tasks_screen():
                         hbox:
                             spacing 20
                             text "[status][t['title']]" style "task_item" color color_status
+                            if sp:
+                                text "[sp[0]]/[sp[1]]" style "task_item" size 24 color "#81C784" xalign 0.5 xminimum 70
                             if not t["done"]:
                                 textbutton "Completar" action Function(complete_task, i):
                                     style "todo_button"
                                     text_size 24
                                     xminimum 160
                                     yminimum 50
+                            textbutton "Detalles" action Show("task_detail_screen", i=i):
+                                style "todo_button"
+                                text_size 24
+                                xminimum 170
+                                yminimum 50
 
     # Botones inferiores
     hbox:
@@ -251,3 +270,87 @@ screen progress_screen():
     textbutton "Volver" action Hide("progress_screen") style "todo_button" text_style "todo_button_text":
         xalign 0.5
         ypos 0.90
+
+################################################################################
+## Pantalla: Detalles de tarea (subtareas)
+################################################################################
+
+screen task_detail_screen(i):
+    modal True
+
+    add Solid(themes[current_theme]["bg"])
+
+    text "Detalles" style "todo_title" xalign 0.5 ypos 50
+
+    $ t = tasks[i] if 0 <= i < len(tasks) else None
+
+    if t is None:
+        text "Esta tarea ya no existe." style "todo_text" xalign 0.5 yalign 0.45
+        textbutton "Volver" action Hide("task_detail_screen") style "todo_button" text_style "todo_button_text":
+            xalign 0.5
+            ypos 0.90
+    else:
+        text "[t['title']]" style "todo_text" size 36 bold True xalign 0.5 ypos 110
+
+        $ substeps = t.get("subtasks", [])
+
+        if not substeps:
+            text "Aún no tiene subtareas.\n¡Divide la tarea en pasos divertidos!" style "todo_text" xalign 0.5 ypos 220
+        else:
+            viewport:
+                xalign 0.5
+                ypos 220
+                xsize 900
+                ysize 520
+                scrollbars "vertical"
+                mousewheel True
+                draggable True
+
+                vbox:
+                    spacing 18
+                    xalign 0.5
+
+                    for j, st in enumerate(substeps):
+                        $ st_mark = "✓  " if st.get("done", False) else "○  "
+                        $ st_color = "#A5D6A7" if st.get("done", False) else "#FFFFFF"
+
+                        frame:
+                            background Solid("#FFFFFF22")
+                            padding (20, 14)
+                            xminimum 850
+
+                            hbox:
+                                spacing 15
+                                textbutton "[st_mark][st.get('text', '')]" action Function(toggle_subtask, i, j):
+                                    style "subtask_button"
+                                    text_style "subtask_text"
+                                    text_color st_color
+                                textbutton "✕" action Function(remove_subtask, i, j):
+                                    style "todo_button"
+                                    text_size 22
+                                    xminimum 90
+                                    yminimum 50
+
+        # Entrada para agregar subtarea
+        frame:
+            background Solid("#00000040")
+            padding (20, 15)
+            xalign 0.5
+            ypos 780
+            xmaximum 700
+
+            input:
+                value VariableInputValue("new_subtask")
+                length 60
+                size 34
+                color "#FFFFFF"
+                xalign 0.0
+                yalign 0.5
+
+        textbutton "Agregar" action [Function(add_subtask, i, new_subtask), SetVariable("new_subtask", "")] style "todo_button" text_style "todo_button_text":
+            xalign 0.5
+            ypos 880
+
+        textbutton "Volver" action Hide("task_detail_screen") style "todo_button" text_style "todo_button_text":
+            xalign 0.5
+            ypos 0.90
