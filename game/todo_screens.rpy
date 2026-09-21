@@ -6,6 +6,9 @@ init offset = -1
 
 default new_title = ""
 default new_subtask = ""
+default new_task_list = "General"
+default new_list_name = ""
+default renaming_list = None
 
 ################################################################################
 ## Estilos base amigables para niños
@@ -106,16 +109,41 @@ screen view_tasks_screen():
 
     add Solid(themes[current_theme]["bg"])
 
-    text "Mis Tareas" style "todo_title" xalign 0.5 ypos 50
+    text "Mis Tareas" style "todo_title" xalign 0.5 ypos 40
+
+    text "Lista: [current_list.capitalize()]" style "todo_text" size 26 xalign 0.5 ypos 100
+
+    # Selector de listas
+    hbox:
+        xalign 0.5
+        ypos 145
+        spacing 10
+
+        for lname in task_lists:
+            textbutton lname.capitalize() action SetVariable("current_list", lname):
+                style "todo_button"
+                text_size 22
+                xminimum 120
+                yminimum 46
+
+        textbutton "Listas" action Show("lists_screen"):
+            style "todo_button"
+            text_size 24
+            xminimum 120
+            yminimum 46
+
+    $ shown = [i for i, t in enumerate(tasks) if t.get("list", task_lists[0]) == current_list]
 
     if not tasks:
-        text "¡Todavía no tienes tareas!\nAgrega una para empezar tu aventura." style "todo_text" xalign 0.5 yalign 0.45
+        text "¡Todavía no tienes tareas!\nAgrega una para empezar tu aventura." style "todo_text" xalign 0.5 ypos 320
+    elif not shown:
+        text "Esta lista aún está vacía.\n¡Agrega una tarea aquí!" style "todo_text" xalign 0.5 ypos 320
     else:
         viewport:
             xalign 0.5
-            ypos 140
+            ypos 205
             xsize 900
-            ysize 550
+            ysize 500
             scrollbars "vertical"
             mousewheel True
             draggable True
@@ -124,7 +152,8 @@ screen view_tasks_screen():
                 spacing 18
                 xalign 0.5
 
-                for i, t in enumerate(tasks):
+                for i in shown:
+                    $ t = tasks[i]
                     $ status = "✓  " if t["done"] else "○  "
                     $ color_status = "#A5D6A7" if t["done"] else "#FFFFFF"
                     $ sp = subtask_progress(t)
@@ -169,15 +198,17 @@ screen add_task_screen():
 
     add Solid(themes[current_theme]["bg"])
 
-    text "Nueva Tarea / Proyecto" style "todo_title" xalign 0.5 ypos 80
+    $ new_task_list = new_task_list if new_task_list in task_lists else task_lists[0]
 
-    text "¿Qué quieres lograr?" style "todo_text" xalign 0.5 ypos 180
+    text "Nueva Tarea / Proyecto" style "todo_title" xalign 0.5 ypos 70
+
+    text "¿Qué quieres lograr?" style "todo_text" xalign 0.5 ypos 170
 
     frame:
         background Solid("#00000040")
         padding (20, 15)
         xalign 0.5
-        ypos 260
+        ypos 240
         xmaximum 700
 
         input:
@@ -188,18 +219,32 @@ screen add_task_screen():
             xalign 0.0
             yalign 0.5
 
+    text "¿En qué lista?" style "todo_text" xalign 0.5 ypos 360
+
     hbox:
         xalign 0.5
         ypos 400
+        spacing 12
+
+        for lname in task_lists:
+            textbutton lname.capitalize() action SetVariable("new_task_list", lname):
+                style "todo_button"
+                text_size 22
+                xminimum 150
+                yminimum 50
+
+    hbox:
+        xalign 0.5
+        ypos 520
         spacing 50
 
         textbutton "Guardar":
-            action [Function(add_new_task, new_title), SetVariable("new_title", ""), Hide("add_task_screen")]
+            action [Function(add_new_task, new_title, new_task_list), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), Hide("add_task_screen")]
             style "todo_button"
             text_style "todo_button_text"
 
         textbutton "Cancelar":
-            action [SetVariable("new_title", ""), Hide("add_task_screen")]
+            action [SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), Hide("add_task_screen")]
             style "todo_button"
             text_style "todo_button_text"
 
@@ -354,3 +399,110 @@ screen task_detail_screen(i):
         textbutton "Volver" action Hide("task_detail_screen") style "todo_button" text_style "todo_button_text":
             xalign 0.5
             ypos 0.90
+
+################################################################################
+## Pantalla: Gestión de listas
+################################################################################
+
+screen lists_screen():
+    modal True
+
+    add Solid(themes[current_theme]["bg"])
+
+    text "Mis Listas" style "todo_title" xalign 0.5 ypos 50
+
+    viewport:
+        xalign 0.5
+        ypos 140
+        xsize 900
+        ysize 380
+        scrollbars "vertical"
+        mousewheel True
+        draggable True
+
+        vbox:
+            spacing 18
+            xalign 0.5
+
+            for lname in task_lists:
+                frame:
+                    background Solid("#FFFFFF22")
+                    padding (20, 14)
+                    xminimum 850
+
+                    hbox:
+                        spacing 15
+                        textbutton lname.capitalize() action [SetVariable("current_list", lname), Hide("lists_screen")]:
+                            style "subtask_button"
+                            text_style "subtask_text"
+                        textbutton "Renombrar" action [SetVariable("renaming_list", lname), SetVariable("new_list_name", lname)]:
+                            style "todo_button"
+                            text_size 22
+                            xminimum 130
+                            yminimum 46
+                        textbutton "✕" action Function(delete_task_list, lname):
+                            style "todo_button"
+                            text_size 22
+                            xminimum 90
+                            yminimum 46
+
+    if renaming_list:
+        text "Renombrando: [renaming_list]" style "todo_text" size 26 xalign 0.5 ypos 560
+
+        frame:
+            background Solid("#00000040")
+            padding (20, 15)
+            xalign 0.5
+            ypos 600
+            xmaximum 700
+
+            input:
+                value VariableInputValue("new_list_name")
+                length 30
+                size 32
+                color "#FFFFFF"
+                xalign 0.0
+                yalign 0.5
+
+        hbox:
+            xalign 0.5
+            ypos 690
+            spacing 30
+
+            textbutton "Guardar nombre":
+                action [Function(rename_task_list, renaming_list, new_list_name), SetVariable("renaming_list", None), SetVariable("new_list_name", "")]
+                style "todo_button"
+                text_style "todo_button_text"
+
+            textbutton "Cancelar":
+                action [SetVariable("renaming_list", None), SetVariable("new_list_name", "")]
+                style "todo_button"
+                text_style "todo_button_text"
+    else:
+        text "Crea una nueva lista" style "todo_text" size 26 xalign 0.5 ypos 560
+
+        frame:
+            background Solid("#00000040")
+            padding (20, 15)
+            xalign 0.5
+            ypos 600
+            xmaximum 700
+
+            input:
+                value VariableInputValue("new_list_name")
+                length 30
+                size 32
+                color "#FFFFFF"
+                xalign 0.0
+                yalign 0.5
+
+        textbutton "Crear lista":
+            action [Function(add_task_list, new_list_name), SetVariable("new_list_name", "")]
+            style "todo_button"
+            text_style "todo_button_text"
+            xalign 0.5
+            ypos 690
+
+    textbutton "Volver" action Hide("lists_screen") style "todo_button" text_style "todo_button_text":
+        xalign 0.5
+        ypos 0.90
