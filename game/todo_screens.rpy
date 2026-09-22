@@ -13,6 +13,7 @@ default pick_year = None
 default pick_month = None
 default cal_selected = None
 default show_list_dropdown = False
+default new_task_list_locked = False
 
 ################################################################################
 ## Estilos base amigables para niños
@@ -103,7 +104,7 @@ screen main_todo():
         spacing 28
 
         textbutton "Ver mis tareas" action Show("view_tasks_screen", transition=page_flip_or_none) style "todo_button" text_style "todo_button_text"
-        textbutton "Agregar nueva tarea" action Show("add_task_screen", transition=page_flip_or_none) style "todo_button" text_style "todo_button_text"
+        textbutton "Agregar nueva tarea" action [SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), Show("add_task_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
         textbutton "Ver calendario" action [SetVariable("pick_year", None), SetVariable("pick_month", None), SetVariable("cal_selected", None), Show("calendar_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
         textbutton "Cambiar tema" action Show("theme_screen", transition=page_flip_or_none) style "todo_button" text_style "todo_button_text"
         textbutton "Ver mi progreso" action Show("progress_screen", transition=page_flip_or_none) style "todo_button" text_style "todo_button_text"
@@ -187,13 +188,18 @@ screen view_tasks_screen():
                                 if not t["done"]:
                                     textbutton "Completar" action Function(complete_task, i):
                                         style "todo_button"
-                                        text_size 34
-                                        xminimum 230
+                                        text_size 30
+                                        xminimum 180
                                         yminimum 72
+                                textbutton "Mover" action Show("move_task_screen", i=i, transition=page_flip_or_none):
+                                    style "todo_button"
+                                    text_size 30
+                                    xminimum 180
+                                    yminimum 72
                                 textbutton "Detalles" action Show("task_detail_screen", i=i, transition=page_flip_or_none):
-                                    style "todo_button" 
-                                    text_size 34 
-                                    xminimum 230 
+                                    style "todo_button"
+                                    text_size 30
+                                    xminimum 180
                                     yminimum 72
 
     # Botones inferiores
@@ -203,7 +209,7 @@ screen view_tasks_screen():
         spacing 40
 
         textbutton "Volver" action Hide("view_tasks_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text"
-        textbutton "Agregar tarea" action [SetVariable("show_list_dropdown", False), SetVariable("new_task_list", current_list), Show("add_task_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
+        textbutton "Agregar tarea" action [SetVariable("show_list_dropdown", False), SetVariable("new_task_list", current_list), SetVariable("new_task_list_locked", True), Show("add_task_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
 
     # Panel desplegable de listas (al final para que pinte encima de la lista)
     if show_list_dropdown:
@@ -226,7 +232,7 @@ screen view_tasks_screen():
                     xalign 0.5
 
                     for lname in task_lists:
-                        $ lbg2 = Frame(Solid("#FFD54F"), 12, 12) if lname == current_list else None
+                        $ lbg2 = Frame(Solid("#FFD54F"), 12, 12) if lname == current_list else Frame(Solid("#FFFFFF"), 12, 12)
                         textbutton lname.capitalize() action [SetVariable("current_list", lname), SetVariable("show_list_dropdown", False)]:
                             style "todo_button"
                             text_size 32
@@ -239,6 +245,58 @@ screen view_tasks_screen():
                         text_size 32
                         xminimum 440
                         yminimum 70
+
+################################################################################
+## Pantalla: Mover tarea a otra lista
+################################################################################
+
+screen move_task_screen(i):
+    modal True
+
+    add Solid("#000000AA")
+
+    $ t = tasks[i] if 0 <= i < len(tasks) else None
+
+    frame:
+        background Solid("#2E7D32")
+        padding (30, 30)
+        xalign 0.5
+        yalign 0.4
+        xmaximum 640
+
+        vbox:
+            spacing 14
+            xalign 0.5
+
+            text "Mover tarea a…" style "todo_text" size 40 xalign 0.5
+
+            if t is None:
+                text "Esta tarea ya no existe." style "todo_text" xalign 0.5
+            else:
+                viewport:
+                    xsize 540
+                    ysize 380
+                    scrollbars "vertical"
+                    mousewheel True
+                    draggable True
+
+                    vbox:
+                        spacing 10
+                        xalign 0.5
+
+                        for lname in task_lists:
+                            $ mbg = Frame(Solid("#FFD54F"), 12, 12) if lname == t.get("list", task_lists[0]) else Frame(Solid("#FFFFFF"), 12, 12)
+                            textbutton lname.capitalize() action [Function(move_task, i, lname), Hide("move_task_screen", transition=page_flip_back_or_none)]:
+                                style "todo_button"
+                                text_size 32
+                                xminimum 460
+                                yminimum 70
+                                background mbg
+
+            textbutton "Cancelar" action Hide("move_task_screen", transition=page_flip_back_or_none):
+                style "todo_button"
+                text_style "todo_button_text"
+                xalign 0.5
 
 ################################################################################
 ## Pantalla: Agregar tarea
@@ -270,28 +328,31 @@ screen add_task_screen():
             xalign 0.0
             yalign 0.5
 
-    text "¿En qué lista?" style "todo_text" xalign 0.5 ypos 430
+    if new_task_list_locked:
+        text "Lista: [new_task_list.capitalize()]" style "todo_text" xalign 0.5 ypos 430
+    else:
+        text "¿En qué lista?" style "todo_text" xalign 0.5 ypos 430
 
-    viewport:
-        xalign 0.5
-        ypos 490
-        xsize 940
-        ysize 96
-        scrollbars "horizontal"
-        draggable True
-        mousewheel "horizontal"
+        viewport:
+            xalign 0.5
+            ypos 490
+            xsize 940
+            ysize 96
+            scrollbars "horizontal"
+            draggable True
+            mousewheel "horizontal"
 
-        hbox:
-            spacing 12
+            hbox:
+                spacing 12
 
-            for lname in task_lists:
-                $ lbg = Frame(Solid("#FFD54F"), 12, 12) if lname == new_task_list else None
-                textbutton lname.capitalize() action SetVariable("new_task_list", lname):
-                    style "todo_button"
-                    text_size 30
-                    xminimum 180
-                    yminimum 62
-                    background lbg
+                for lname in task_lists:
+                    $ lbg = Frame(Solid("#FFD54F"), 12, 12) if lname == new_task_list else Frame(Solid("#FFFFFF"), 12, 12)
+                    textbutton lname.capitalize() action SetVariable("new_task_list", lname):
+                        style "todo_button"
+                        text_size 30
+                        xminimum 180
+                        yminimum 62
+                        background lbg
 
     hbox:
         xalign 0.5
@@ -299,12 +360,12 @@ screen add_task_screen():
         spacing 50
 
         textbutton "Guardar":
-            action [Function(add_new_task, new_title, new_task_list), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), Hide("add_task_screen")]
+            action [Function(add_new_task, new_title, new_task_list), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), Hide("add_task_screen", transition=page_flip_back_or_none)]
             style "todo_button"
             text_style "todo_button_text"
 
         textbutton "Cancelar":
-            action [SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), Hide("add_task_screen")]
+            action [SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), Hide("add_task_screen", transition=page_flip_back_or_none)]
             style "todo_button"
             text_style "todo_button_text"
 
@@ -641,15 +702,21 @@ screen deadline_pick_screen(i, j=None):
         spacing 30
 
         textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 160
+            xminimum 130
+            yminimum 70
+            text_size 34
         textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 160
+            xminimum 130
+            yminimum 70
+            text_size 34
         textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 160
+            xminimum 130
+            yminimum 70
+            text_size 34
 
     grid 7 1:
         xalign 0.5
-        ypos 260
+        ypos 275
         xspacing 8
 
         for wd in WEEKDAYS_ES:
@@ -659,7 +726,7 @@ screen deadline_pick_screen(i, j=None):
 
     vbox:
         xalign 0.5
-        ypos 300
+        ypos 320
         spacing 8
 
         for week in grid:
@@ -719,15 +786,21 @@ screen calendar_screen():
         spacing 30
 
         textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 160
+            xminimum 130
+            yminimum 70
+            text_size 34
         textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 160
+            xminimum 130
+            yminimum 70
+            text_size 34
         textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 160
+            xminimum 130
+            yminimum 70
+            text_size 34
 
     grid 7 1:
         xalign 0.5
-        ypos 252
+        ypos 270
         xspacing 8
 
         for wd in WEEKDAYS_ES:

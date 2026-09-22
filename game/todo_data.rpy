@@ -121,6 +121,11 @@ init python:
                 store.current_list = default_list
             renpy.notify("Lista eliminada")
 
+    def move_task(task_index, new_list):
+        if 0 <= task_index < len(store.tasks) and new_list in store.task_lists:
+            store.tasks[task_index]["list"] = new_list
+            renpy.notify("Tarea movida a %s" % new_list.capitalize())
+
     # --- Fechas y deadlines ---
 
     def today_tuple():
