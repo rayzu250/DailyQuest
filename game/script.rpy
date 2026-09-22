@@ -100,5 +100,6 @@ label start:
     jump main_menu_todo
 
 label main_menu_todo:
+    $ rollover_recurring()
     call screen main_todo
     return   

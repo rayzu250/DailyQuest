@@ -14,6 +14,10 @@ default pick_month = None
 default cal_selected = None
 default show_list_dropdown = False
 default new_task_list_locked = False
+default new_rec_freq = "ninguna"
+default new_rec_days = []
+default new_rec_h = 8
+default new_rec_m = 0
 
 ################################################################################
 ## Estilos base amigables para niños
@@ -186,6 +190,7 @@ screen view_tasks_screen():
                     $ sp = subtask_progress(t)
                     $ dl = next_deadline(t)
                     $ dcolor = deadline_date_color(dl)
+                    $ rec_txt = recurrence_description(t)
 
                     frame:
                         background Solid("#FFFFFF22")
@@ -202,6 +207,9 @@ screen view_tasks_screen():
                                     text "[sp[0]]/[sp[1]]" style "task_item" size 30 color "#81C784" xalign 0.5 xminimum 70
                                 if dl:
                                     text date_tuple_to_string(dl) style "task_item" size 28 color (dcolor or "#81C784") xalign 0.5 xminimum 110
+
+                            if rec_txt:
+                                text "Se repite: [rec_txt]" style "task_item" size 28 color "#B9F6CA"
 
                             hbox:
                                 spacing 20
@@ -370,18 +378,108 @@ screen add_task_screen():
                         yminimum 62
                         background lbg
 
+    text "¿Se repite?" style "todo_text" xalign 0.5 ypos 600
+
+    $ freq = new_rec_freq
+    $ time_y = 740 if freq == "diaria" else (820 if freq == "semanal" else 850)
+    $ btn_y = 660 if freq == "ninguna" else time_y + 150
+
     hbox:
         xalign 0.5
-        ypos 660
+        ypos 650
+        spacing 12
+
+        for f, flabel in [("ninguna", "Una vez"), ("diaria", "Diaria"), ("semanal", "Semanal"), ("mensual", "Mensual")]:
+            $ fbg = Frame(Solid("#FFD54F"), 12, 12) if f == new_rec_freq else Frame(Solid("#FFFFFF"), 12, 12)
+            textbutton flabel action [SetVariable("new_rec_freq", f), SetVariable("new_rec_days", [])]:
+                style "todo_button"
+                text_size 28
+                xminimum 200
+                yminimum 62
+                background fbg
+
+    if freq == "semanal":
+        hbox:
+            xalign 0.5
+            ypos 730
+            spacing 12
+
+            for wd in range(7):
+                $ dbg = Frame(Solid("#FFD54F"), 12, 12) if wd in new_rec_days else Frame(Solid("#FFFFFF"), 12, 12)
+                textbutton WD_SHORT_ES[wd].capitalize() action Function(toggle_new_rec_day, wd):
+                    style "todo_button"
+                    text_size 28
+                    xminimum 110
+                    yminimum 62
+                    background dbg
+
+    if freq == "mensual":
+        viewport:
+            xalign 0.5
+            ypos 730
+            xsize 940
+            ysize 96
+            scrollbars "horizontal"
+            draggable True
+            mousewheel "horizontal"
+
+            hbox:
+                spacing 12
+
+                for dd in range(1, 32):
+                    $ dbg = Frame(Solid("#FFD54F"), 12, 12) if dd in new_rec_days else Frame(Solid("#FFFFFF"), 12, 12)
+                    textbutton str(dd) action Function(toggle_new_rec_day, dd):
+                        style "todo_button"
+                        text_size 28
+                        xminimum 95
+                        yminimum 62
+                        background dbg
+
+    if freq != "ninguna":
+        $ hh = "%02d" % new_rec_h
+        $ mm = "%02d" % new_rec_m
+        hbox:
+            xalign 0.5
+            ypos time_y
+            spacing 12
+
+            text "Hora" style "todo_text" yalign 0.5
+            textbutton "-" action Function(bump_new_rec_h, -1):
+                style "todo_button"
+                text_size 30
+                xminimum 90
+                yminimum 62
+            text "[hh]" style "todo_text" size 40 xminimum 100 textalign 0.5 yalign 0.5
+            textbutton "+" action Function(bump_new_rec_h, 1):
+                style "todo_button"
+                text_size 30
+                xminimum 90
+                yminimum 62
+            text ":" style "todo_text" size 40 yalign 0.5
+            textbutton "-" action Function(bump_new_rec_m, -5):
+                style "todo_button"
+                text_size 30
+                xminimum 90
+                yminimum 62
+            text "[mm]" style "todo_text" size 40 xminimum 100 textalign 0.5 yalign 0.5
+            textbutton "+" action Function(bump_new_rec_m, 5):
+                style "todo_button"
+                text_size 30
+                xminimum 90
+                yminimum 62
+
+    hbox:
+        xalign 0.5
+        ypos btn_y
         spacing 50
 
         textbutton "Guardar":
-            action [Function(add_new_task, new_title, new_task_list), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), Hide("add_task_screen", transition=page_flip_back_or_none)]
+            action [Function(add_new_task, new_title, new_task_list, {"freq": new_rec_freq, "days": sorted(new_rec_days), "time": "%02d:%02d" % (new_rec_h, new_rec_m)} if new_rec_freq != "ninguna" else None), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("new_rec_freq", "ninguna"), SetVariable("new_rec_days", []), SetVariable("new_rec_h", 8), SetVariable("new_rec_m", 0), Hide("add_task_screen", transition=page_flip_back_or_none)]
             style "todo_button"
             text_style "todo_button_text"
 
         textbutton "Cancelar":
-            action [SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), Hide("add_task_screen", transition=page_flip_back_or_none)]
+            action [SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("new_rec_freq", "ninguna"), SetVariable("new_rec_days", []), SetVariable("new_rec_h", 8), SetVariable("new_rec_m", 0), Hide("add_task_screen", transition=page_flip_back_or_none)]
             style "todo_button"
             text_style "todo_button_text"
 
@@ -576,6 +674,15 @@ screen task_detail_screen(i):
         textbutton "Agregar" action [Function(add_subtask, i, new_subtask), SetVariable("new_subtask", "")] style "todo_button" text_style "todo_button_text":
             xalign 0.5
             ypos 880
+
+        $ rec_txt = recurrence_description(t)
+        if rec_txt:
+            text "Se repite: [rec_txt]" style "todo_text" size 36 xalign 0.5 ypos 1000
+            textbutton "Quitar repetición" action Function(clear_recurrence, i):
+                style "todo_button_small"
+                text_style "todo_button_small_text"
+                xalign 0.5
+                ypos 1070
 
         textbutton "Volver" action Hide("task_detail_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
             xalign 0.5 
@@ -823,7 +930,7 @@ screen calendar_screen():
                     $ in_month = d.month == cm
                     $ is_today = dkey == today_tuple()
                     $ is_sel = dkey == sel
-                    $ n_dl = count_deadlines_on(dkey)
+                    $ n_dl = count_deadlines_on(dkey) + count_recurring_on(dkey)
                     $ dlabel = ("%d" % d.day) + (("  ·%d" % n_dl) if n_dl else "")
                     $ d_bg = "#E8F5E9" if is_sel else ("#4CAF5088" if n_dl else ("#FFD54F44" if is_today else ("#FFFFFF33" if in_month else "#FFFFFF11")))
                     $ d_tcolor = "#1B5E20" if is_sel else ("#FFD54F" if is_today else ("#FFFFFF55" if not in_month else "#FFFFFF"))
@@ -850,6 +957,8 @@ screen calendar_screen():
                     sel_tasks.append((idx, j, s.get("text", "")))
             if not steps and valid_date(t.get("deadline")) and tuple(t["deadline"]) == sel:
                 sel_tasks.append((idx, None, ""))
+            if is_recurrence_on(t, sel) and not any(x[0] == idx for x in sel_tasks):
+                sel_tasks.append((idx, None, " (recurrente)"))
 
     if not sel_tasks:
         text "No hay tareas para este día." style "todo_text" xalign 0.5 ypos 845

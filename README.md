@@ -23,7 +23,8 @@ earns a random fruit with popup animation, guide celebration and sound.
 - `game/script.rpy` — story flow, guide sprite, ATL transforms (`guia_center`,
   `reward_pop_up`, `guia_happy_bounce`, `guia_reward_bounce`).
 - `game/todo_data.rpy` — data model and helpers (tasks, subtasks with per-subtask
-  `deadline`/`fruit`, lists, calendar dates, migrations for old saves).
+  `deadline`/`fruit`, task-level `recurrence` rules with daily/weekly/monthly
+  cycles, lists, calendar dates, migrations for old saves).
 - `game/todo_screens.rpy` — all ToDo screens and styles, plus the `reward_popup`
   reward screen and the collapsible list dropdown.
 - `game/screens.rpy`, `game/gui.rpy`, `game/options.rpy` — Ren'Py defaults,
