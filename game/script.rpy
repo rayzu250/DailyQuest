@@ -5,6 +5,9 @@ default player_name = "Amigo"
 default completed_tasks = 0
 default current_theme = "bosque"
 
+# Bandera para activar o desactivar el efecto de pasar página (se cambia en Opciones)
+default persistent.page_flip_enabled = True
+
 # Placeholders visuales hasta que exista arte real
 image bg_room = Solid("#1B5E20")
 image guia happy = "images/guias/red.png"
@@ -41,6 +44,43 @@ transform guia_reward_bounce:
     easeout 0.12 yoffset 0
     easein 0.08 yoffset -20
     easeout 0.08 yoffset 0
+
+# Efecto de pasar página hacia adelante (lomo a la izquierda): la página
+# actual se pliega y revela la nueva debajo, como en un cuento o cómic
+transform page_flip(t=0.35, *, old_widget=None, new_widget=None):
+    delay t
+    new_widget
+    events False
+    block:
+        old_widget
+        events False
+        xalign 0.0 yalign 0.5
+        xzoom 1.0
+        easein t xzoom 0.0
+
+# Efecto de pasar página hacia atrás (lomo a la derecha) para los "Volver"
+transform page_flip_back(t=0.35, *, old_widget=None, new_widget=None):
+    delay t
+    new_widget
+    events False
+    block:
+        old_widget
+        events False
+        xalign 1.0 yalign 0.5
+        xzoom 1.0
+        easein t xzoom 0.0
+
+init python:
+    # Transiciones condicionales: respetan la bandera de Opciones
+    def page_flip_or_none(old_widget=None, new_widget=None):
+        if persistent.page_flip_enabled:
+            return page_flip(old_widget=old_widget, new_widget=new_widget)
+        return None
+
+    def page_flip_back_or_none(old_widget=None, new_widget=None):
+        if persistent.page_flip_enabled:
+            return page_flip_back(old_widget=old_widget, new_widget=new_widget)
+        return None
 
 label start:
     if not renpy.music.get_playing():

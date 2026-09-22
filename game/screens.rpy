@@ -760,6 +760,11 @@ screen preferences():
                     textbutton _("Tras elecciones") action Preference("after choices", "toggle")
                     textbutton _("Transiciones") action InvertSelected(Preference("transitions", "toggle"))
 
+                vbox:
+                    style_prefix "check"
+                    label _("Efecto página")
+                    textbutton _("Pasar página") action ToggleField(persistent, "page_flip_enabled")
+
                 ## Aquí se pueden añadir 'vboxes' adicionales del tipo
                 ## "radio_pref" o "check_pref" para nuevas preferencias.
 
