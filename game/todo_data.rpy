@@ -51,7 +51,25 @@ init python:
             t["last_completed"] = today_tuple()
             store.completed_tasks += 1
             if t.get("recurrence"):
-                renpy.notify("¡Misión lista! Se repite en el próximo ciclo")
+                # Genera la copia del próximo ciclo (las copias solo nacen al completar)
+                base = today_tuple()
+                ref = (_dt.date(base[0], base[1], base[2]) + _dt.timedelta(days=1))
+                nxt = next_occurrence(t, (ref.year, ref.month, ref.day))
+                if nxt is not None:
+                    subs = [{"text": s.get("text", ""), "done": False, "deadline": None, "fruit": None} for s in t.get("subtasks", [])]
+                    store.tasks.append({
+                        "title": t["title"],
+                        "done": False,
+                        "priority": t.get("priority", 1),
+                        "list": t.get("list", store.task_lists[0]),
+                        "subtasks": subs,
+                        "deadline": tuple(nxt),
+                        "recurrence": t.get("recurrence"),
+                        "last_completed": None,
+                    })
+                    renpy.notify("¡Misión lista! +1 estrella ★ Ya generé la próxima")
+                else:
+                    renpy.notify("¡Misión lista! +1 estrella ★")
             else:
                 renpy.notify("¡Bien hecho! +1 estrella ★")
 
@@ -276,7 +294,7 @@ init python:
 
     def is_recurrence_on(task, dkey):
         r = task.get("recurrence")
-        if not r:
+        if not r or task.get("done"):
             return False
         nxt = next_occurrence(task, dkey)
         return nxt is not None and tuple(nxt) == tuple(dkey)
@@ -314,16 +332,6 @@ init python:
 
     def clear_recurrence(task_index):
         set_recurrence(task_index, "ninguna", [], "")
-
-    # Reabre las recurrentes completadas cuando llega un nuevo ciclo
-    def rollover_recurring():
-        t = today_tuple()
-        for task in store.tasks:
-            r = task.get("recurrence")
-            if r and task.get("done"):
-                last = task.get("last_completed")
-                if last and tuple(last) < t and next_occurrence(task, t) == t:
-                    task["done"] = False
 
     # Alterna un día en el selector del formulario (reasigna para refrescar)
     def toggle_new_rec_day(d):
