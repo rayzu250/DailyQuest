@@ -49,9 +49,10 @@ transform guia_reward_bounce:
 # actual se pliega y revela la nueva debajo, como en un cuento o cómic
 transform page_flip(t=0.35, *, old_widget=None, new_widget=None):
     delay t
-    new_widget
-    events False
-    block:
+    contains:
+        new_widget
+        events False
+    contains:
         old_widget
         events False
         xalign 0.0 yalign 0.5
@@ -61,9 +62,10 @@ transform page_flip(t=0.35, *, old_widget=None, new_widget=None):
 # Efecto de pasar página hacia atrás (lomo a la derecha) para los "Volver"
 transform page_flip_back(t=0.35, *, old_widget=None, new_widget=None):
     delay t
-    new_widget
-    events False
-    block:
+    contains:
+        new_widget
+        events False
+    contains:
         old_widget
         events False
         xalign 1.0 yalign 0.5
