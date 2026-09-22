@@ -36,6 +36,17 @@ style todo_button_text:
     xalign 0.5
     yalign 0.5
 
+# Variante compacta para filas con varios botones (grupo propio para no
+# heredar el tamaño de los botones grandes)
+style todo_button_small is todo_button:
+    padding (20, 14)
+    xminimum 180
+    yminimum 66
+    size_group "todo_row_buttons"
+
+style todo_button_small_text is todo_button_text:
+    size 26
+
 style todo_title:
     size 64
     color "#FFFFFF"
@@ -146,7 +157,7 @@ screen view_tasks_screen():
     else:
         viewport:
             xalign 0.5
-            ypos 245
+            ypos 270
             xsize 900
             ysize 480
             scrollbars "vertical"
@@ -187,20 +198,14 @@ screen view_tasks_screen():
 
                                 if not t["done"]:
                                     textbutton "Completar" action Function(complete_task, i):
-                                        style "todo_button"
-                                        text_size 30
-                                        xminimum 180
-                                        yminimum 72
+                                        style "todo_button_small"
+                                        text_style "todo_button_small_text"
                                 textbutton "Mover" action Show("move_task_screen", i=i, transition=page_flip_or_none):
-                                    style "todo_button"
-                                    text_size 30
-                                    xminimum 180
-                                    yminimum 72
+                                    style "todo_button_small"
+                                    text_style "todo_button_small_text"
                                 textbutton "Detalles" action Show("task_detail_screen", i=i, transition=page_flip_or_none):
-                                    style "todo_button"
-                                    text_size 30
-                                    xminimum 180
-                                    yminimum 72
+                                    style "todo_button_small"
+                                    text_style "todo_button_small_text"
 
     # Botones inferiores
     hbox:
