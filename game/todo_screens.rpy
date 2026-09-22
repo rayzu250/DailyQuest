@@ -47,6 +47,17 @@ style todo_button_small is todo_button:
 style todo_button_small_text is todo_button_text:
     size 26
 
+# Variante para navegación de mes (grupo propio para no heredar el
+# tamaño de los botones grandes)
+style todo_button_nav is todo_button:
+    padding (16, 10)
+    xminimum 130
+    yminimum 70
+    size_group "todo_nav_buttons"
+
+style todo_button_nav_text is todo_button_text:
+    size 34
+
 style todo_title:
     size 64
     color "#FFFFFF"
@@ -706,18 +717,9 @@ screen deadline_pick_screen(i, j=None):
         ypos 190
         spacing 30
 
-        textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 130
-            yminimum 70
-            text_size 34
-        textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 130
-            yminimum 70
-            text_size 34
-        textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 130
-            yminimum 70
-            text_size 34
+        textbutton "◀" action Function(month_move, -1) style "todo_button_nav" text_style "todo_button_nav_text"
+        textbutton "Hoy" action Function(set_pick_today) style "todo_button_nav" text_style "todo_button_nav_text"
+        textbutton "▶" action Function(month_move, 1) style "todo_button_nav" text_style "todo_button_nav_text"
 
     grid 7 1:
         xalign 0.5
@@ -727,6 +729,7 @@ screen deadline_pick_screen(i, j=None):
         for wd in WEEKDAYS_ES:
             fixed:
                 xsize 120
+                ysize 50
                 text wd style "todo_text" size 34 xalign 0.5 yalign 0.5
 
     vbox:
@@ -790,18 +793,9 @@ screen calendar_screen():
         ypos 190
         spacing 30
 
-        textbutton "◀" action Function(month_move, -1) style "todo_button" text_style "todo_button_text":
-            xminimum 130
-            yminimum 70
-            text_size 34
-        textbutton "Hoy" action Function(set_pick_today) style "todo_button" text_style "todo_button_text":
-            xminimum 130
-            yminimum 70
-            text_size 34
-        textbutton "▶" action Function(month_move, 1) style "todo_button" text_style "todo_button_text":
-            xminimum 130
-            yminimum 70
-            text_size 34
+        textbutton "◀" action Function(month_move, -1) style "todo_button_nav" text_style "todo_button_nav_text"
+        textbutton "Hoy" action Function(set_pick_today) style "todo_button_nav" text_style "todo_button_nav_text"
+        textbutton "▶" action Function(month_move, 1) style "todo_button_nav" text_style "todo_button_nav_text"
 
     grid 7 1:
         xalign 0.5
@@ -811,6 +805,7 @@ screen calendar_screen():
         for wd in WEEKDAYS_ES:
             fixed:
                 xsize 120
+                ysize 50
                 text wd style "todo_text" size 34 xalign 0.5 yalign 0.01
 
     vbox:
