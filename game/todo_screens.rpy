@@ -204,7 +204,7 @@ screen navigation_drawer():
                 null height 10
 
                 # Opciones de navegación
-                textbutton "📂 Mis Listas" action [Hide("navigation_drawer"), SetVariable("show_list_dropdown", False), Show("view_tasks_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "📂 Mis Listas" action [Hide("navigation_drawer"), Hide("main_todo"), SetVariable("show_list_dropdown", False), Show("view_tasks_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
                 textbutton "➕ Nueva Tarea" action [Hide("navigation_drawer"), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
                 textbutton "📅 Calendario" action [Hide("navigation_drawer"), SetVariable("pick_year", None), SetVariable("pick_month", None), SetVariable("cal_selected", None), Show("calendar_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
                 textbutton "🎨 Cambiar Mundo" action [Hide("navigation_drawer"), Show("theme_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
@@ -368,7 +368,7 @@ screen view_tasks_screen():
         ypos 0.90
         spacing 40
 
-        textbutton "↩" action Hide("view_tasks_screen", transition=page_flip_back_or_none) style "todo_button_small" text_style "todo_button_small_text"
+        textbutton "↩" action Show("main_todo", transition=page_flip_or_none) style "todo_button_small" text_style "todo_button_small_text"
         textbutton "Agregar tarea" action [SetVariable("show_list_dropdown", False), SetVariable("new_task_list", current_list), SetVariable("new_task_list_locked", True), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
 
     # Panel desplegable de listas (al final para que pinte encima de la lista)
