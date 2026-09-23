@@ -66,33 +66,41 @@ init python:
             renpy.notify("¡Tarea agregada!")
 
     def complete_task(index):
-        if 0 <= index < len(store.tasks) and not store.tasks[index]["done"]:
+        if 0 <= index < len(store.tasks):
             t = store.tasks[index]
-            t["done"] = True
-            t["last_completed"] = today_tuple()
-            store.completed_tasks += 1
-            if t.get("recurrence"):
-                # Genera la copia del próximo ciclo (las copias solo nacen al completar)
-                base = today_tuple()
-                ref = (_dt.date(base[0], base[1], base[2]) + _dt.timedelta(days=1))
-                nxt = next_occurrence(t, (ref.year, ref.month, ref.day))
-                if nxt is not None:
-                    subs = [{"text": s.get("text", ""), "done": False, "deadline": None, "fruit": None} for s in t.get("subtasks", [])]
-                    store.tasks.append({
-                        "title": t["title"],
-                        "done": False,
-                        "priority": t.get("priority", 1),
-                        "list": t.get("list", store.task_lists[0]),
-                        "subtasks": subs,
-                        "deadline": tuple(nxt),
-                        "recurrence": t.get("recurrence"),
-                        "last_completed": None,
-                    })
-                    renpy.notify("¡Misión lista! +1 estrella ★ Ya generé la próxima")
+            if not t["done"]:
+                t["done"] = True
+                t["last_completed"] = today_tuple()
+                store.completed_tasks += 1
+                if t.get("recurrence"):
+                    # Genera la copia del próximo ciclo (las copias solo nacen al completar)
+                    base = today_tuple()
+                    ref = (_dt.date(base[0], base[1], base[2]) + _dt.timedelta(days=1))
+                    nxt = next_occurrence(t, (ref.year, ref.month, ref.day))
+                    if nxt is not None:
+                        subs = [{"text": s.get("text", ""), "done": False, "deadline": None, "fruit": None} for s in t.get("subtasks", [])]
+                        store.tasks.append({
+                            "title": t["title"],
+                            "done": False,
+                            "priority": t.get("priority", 1),
+                            "list": t.get("list", store.task_lists[0]),
+                            "subtasks": subs,
+                            "deadline": tuple(nxt),
+                            "recurrence": t.get("recurrence"),
+                            "last_completed": None,
+                        })
+                        renpy.notify("¡Misión lista! +1 estrella ★ Ya generé la próxima")
+                    else:
+                        renpy.notify("¡Misión lista! +1 estrella ★")
                 else:
-                    renpy.notify("¡Misión lista! +1 estrella ★")
+                    renpy.notify("¡Bien hecho! +1 estrella ★")
             else:
-                renpy.notify("¡Bien hecho! +1 estrella ★")
+                # Reabre la tarea (la copia generada queda como historial)
+                t["done"] = False
+                t["last_completed"] = None
+                if store.completed_tasks > 0:
+                    store.completed_tasks -= 1
+                renpy.notify("Tarea reabierta")
 
     # --- Subtareas ---
 

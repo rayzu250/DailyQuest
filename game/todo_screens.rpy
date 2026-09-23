@@ -177,6 +177,7 @@ screen navigation_drawer():
             yfill True
 
             $ guia_img, guia_msg = get_guia_greeting()
+            $ guia_img = guia_img if renpy.loadable("images/guias/%s.png" % guia_img) else "images/guias/red.png"
 
             vbox:
                 spacing 20
@@ -203,11 +204,11 @@ screen navigation_drawer():
                 null height 10
 
                 # Opciones de navegación
-                textbutton "Mis Tareas" action [Hide("navigation_drawer"), SetVariable("show_list_dropdown", False), Show("view_tasks_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
-                textbutton "Nueva Tarea" action [Hide("navigation_drawer"), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
-                textbutton "Calendario" action [Hide("navigation_drawer"), SetVariable("pick_year", None), SetVariable("pick_month", None), SetVariable("cal_selected", None), Show("calendar_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
-                textbutton "Cambiar Mundo" action [Hide("navigation_drawer"), Show("theme_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
-                textbutton "Mi Progreso" action [Hide("navigation_drawer"), Show("progress_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "📂 Mis Listas" action [Hide("navigation_drawer"), SetVariable("show_list_dropdown", False), Show("view_tasks_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "➕ Nueva Tarea" action [Hide("navigation_drawer"), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "📅 Calendario" action [Hide("navigation_drawer"), SetVariable("pick_year", None), SetVariable("pick_month", None), SetVariable("cal_selected", None), Show("calendar_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "🎨 Cambiar Mundo" action [Hide("navigation_drawer"), Show("theme_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "📊 Mi Progreso" action [Hide("navigation_drawer"), Show("progress_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
 
                 null height 20
 
@@ -240,6 +241,7 @@ screen main_todo():
 
     # Saludo de la guía según el progreso
     $ guia_img_main, guia_msg_main = get_guia_greeting()
+    $ guia_img_main = guia_img_main if renpy.loadable("images/guias/%s.png" % guia_img_main) else "images/guias/red.png"
 
     hbox:
         xalign 0.5
@@ -349,10 +351,10 @@ screen view_tasks_screen():
                                 spacing 20
                                 xalign 1.0
 
-                                if not t["done"]:
-                                    textbutton "Completar" action Function(complete_task, i):
-                                        style "todo_button_small"
-                                        text_style "todo_button_small_text"
+                                $ done_label = "Reabrir" if t["done"] else "Completar"
+                                textbutton "[done_label]" action Function(complete_task, i):
+                                    style "todo_button_small"
+                                    text_style "todo_button_small_text"
                                 textbutton "Mover" action Show("move_task_screen", i=i, transition=page_flip_or_none):
                                     style "todo_button_small"
                                     text_style "todo_button_small_text"
@@ -366,7 +368,7 @@ screen view_tasks_screen():
         ypos 0.90
         spacing 40
 
-        textbutton "Volver" action Hide("view_tasks_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text"
+        textbutton "↩" action Hide("view_tasks_screen", transition=page_flip_back_or_none) style "todo_button_small" text_style "todo_button_small_text"
         textbutton "Agregar tarea" action [SetVariable("show_list_dropdown", False), SetVariable("new_task_list", current_list), SetVariable("new_task_list_locked", True), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
 
     # Panel desplegable de listas (al final para que pinte encima de la lista)
@@ -417,6 +419,12 @@ screen move_task_screen(i):
     modal True
 
     add Solid("#000000AA")
+
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
 
     $ t = tasks[i] if 0 <= i < len(tasks) else None
 
@@ -478,6 +486,12 @@ screen add_task_screen():
     $ new_task_list = new_task_list if new_task_list in task_lists else task_lists[0]
 
     text "Nueva Tarea / Proyecto" style "todo_title" xalign 0.5 ypos 70
+
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
 
     text "¿Qué quieres lograr?" style "todo_text" xalign 0.5 ypos 200
 
@@ -679,6 +693,12 @@ screen theme_screen():
 
     text "Elige tu mundo" style "todo_title" xalign 0.5 ypos 60
 
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
+
     vbox:
         xalign 0.5
         yalign 0.5
@@ -687,7 +707,9 @@ screen theme_screen():
         for theme_name in themes:
             textbutton theme_name.capitalize() action [SetVariable("current_theme", theme_name), Hide("theme_screen")] style "todo_button" text_style "todo_button_text"
 
-    textbutton "Volver" action Hide("theme_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
+    textbutton "↩" action Hide("theme_screen", transition=page_flip_back_or_none):
+        style "todo_button_small"
+        text_style "todo_button_small_text"
         xalign 0.5
         ypos 0.90
 
@@ -701,6 +723,12 @@ screen progress_screen():
     add Solid(themes[current_theme]["bg"])
 
     text "Mi Progreso" style "todo_title" xalign 0.5 ypos 60
+
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
 
     $ total = len(tasks)
     $ done = sum(1 for t in tasks if t["done"])
@@ -732,7 +760,9 @@ screen progress_screen():
         else:
             text "Cada tarea te acerca a tu meta." style "todo_text"
 
-    textbutton "Volver" action Hide("progress_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
+    textbutton "↩" action Hide("progress_screen", transition=page_flip_back_or_none):
+        style "todo_button_small"
+        text_style "todo_button_small_text"
         xalign 0.5
         ypos 0.90
 
@@ -745,6 +775,11 @@ screen reward_popup():
 
     # Solo pinta si hay recompensa pendiente (al desmarcar no molesta)
     if last_reward:
+        button:
+            style "blank_button"
+            xfill True yfill True
+            action Hide("reward_popup")
+
         add "images/fruits/%s.png" % last_reward:
             at reward_pop_up
             xalign 0.5
@@ -770,12 +805,20 @@ screen task_detail_screen(i):
 
     text "Detalles" style "todo_title" xalign 0.5 ypos 50
 
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
+
     $ t = tasks[i] if 0 <= i < len(tasks) else None
 
     if t is None:
         text "Esta tarea ya no existe." style "todo_text" xalign 0.5 yalign 0.45
-        textbutton "Volver" action Hide("task_detail_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
-            xalign 0.5 
+        textbutton "↩" action Hide("task_detail_screen", transition=page_flip_back_or_none):
+            style "todo_button_small"
+            text_style "todo_button_small_text"
+            xalign 0.5
             ypos 0.90
     else:
         text "[t['title']]" style "todo_text" size 44 bold True xalign 0.5 ypos 140
@@ -814,10 +857,13 @@ screen task_detail_screen(i):
                             hbox:
                                 spacing 12
                                 if fruit_img:
-                                    add fruit_img:
-                                        xysize (56, 56)
-                                        fit "contain"
-                                        yalign 0.5
+                                    button:
+                                        style "blank_button"
+                                        action [Function(toggle_subtask, i, j), Show("reward_popup")]
+                                        add fruit_img:
+                                            xysize (56, 56)
+                                            fit "contain"
+                                            yalign 0.5
                                 else:
                                     fixed:
                                         xysize (56, 56)
@@ -876,8 +922,10 @@ screen task_detail_screen(i):
                 xalign 0.5
                 ypos 1070
 
-        textbutton "Volver" action Hide("task_detail_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
-            xalign 0.5 
+        textbutton "↩" action Hide("task_detail_screen", transition=page_flip_back_or_none):
+            style "todo_button_small"
+            text_style "todo_button_small_text"
+            xalign 0.5
             ypos 0.90
 
 ################################################################################
@@ -890,6 +938,12 @@ screen lists_screen():
     add Solid(themes[current_theme]["bg"])
 
     text "Mis Listas" style "todo_title" xalign 0.5 ypos 50
+
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
 
     viewport:
         xalign 0.5
@@ -994,8 +1048,10 @@ screen lists_screen():
                 text_style "todo_button_icon_text"
                 yminimum 90
 
-    textbutton "Volver" action Hide("lists_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
-        xalign 0.5 
+    textbutton "↩" action Hide("lists_screen", transition=page_flip_back_or_none):
+        style "todo_button_small"
+        text_style "todo_button_small_text"
+        xalign 0.5
         ypos 0.90
 
 ################################################################################
@@ -1008,6 +1064,12 @@ screen deadline_pick_screen(i, j=None):
     add Solid(themes[current_theme]["bg"])
 
     text "Elige la fecha límite" style "todo_title" xalign 0.5 ypos 40
+
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
 
     $ cy = pick_year if pick_year else today_tuple()[0]
     $ cm = pick_month if pick_month else today_tuple()[1]
@@ -1069,7 +1131,9 @@ screen deadline_pick_screen(i, j=None):
         xalign 0.5
         ypos 850
 
-    textbutton "Volver" action Hide("deadline_pick_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
+    textbutton "↩" action Hide("deadline_pick_screen", transition=page_flip_back_or_none):
+        style "todo_button_small"
+        text_style "todo_button_small_text"
         xalign 0.5
         ypos 0.90
 
@@ -1083,6 +1147,12 @@ screen calendar_screen():
     add Solid(themes[current_theme]["bg"])
 
     text "Mi Calendario" style "todo_title" xalign 0.5 ypos 40
+
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
 
     $ cy = pick_year if pick_year else today_tuple()[0]
     $ cm = pick_month if pick_month else today_tuple()[1]
@@ -1190,6 +1260,8 @@ screen calendar_screen():
                                 style "todo_button_small"
                                 text_style "todo_button_small_text"
 
-    textbutton "Volver" action Hide("calendar_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
+    textbutton "↩" action Hide("calendar_screen", transition=page_flip_back_or_none):
+        style "todo_button_small"
+        text_style "todo_button_small_text"
         xalign 0.5
         ypos 0.90
