@@ -377,6 +377,22 @@ init python:
     def bump_new_rec_m(d):
         store.new_rec_m = (store.new_rec_m + d) % 60
 
+    # Prompts del motor para variantes táctiles (gestionan el IME solos)
+    def prompt_new_title():
+        r = renpy.input("¿Qué quieres lograr?", default=store.new_title, length=40)
+        if r is not None:
+            store.new_title = r.strip()
+
+    def prompt_new_list_name():
+        r = renpy.input("Nombre de la lista:", default=store.new_list_name, length=30)
+        if r is not None:
+            store.new_list_name = r.strip()
+
+    def prompt_new_subtask():
+        r = renpy.input("Nueva subtarea:", default=store.new_subtask, length=60)
+        if r is not None:
+            store.new_subtask = r.strip()
+
     # Asegura los campos de recurrencia en partidas guardadas viejas
     def _migrate_recurrence():
         for t in store.tasks:

@@ -287,6 +287,13 @@ screen view_tasks_screen():
         xpos 30
         ypos 30
 
+    textbutton "↩" action Show("main_todo", transition=page_flip_or_none):
+        style "todo_button_small"
+        text_style "todo_button_small_text"
+        xalign 1.0
+        xoffset -30
+        ypos 30
+
     text "Lista: [current_list.capitalize()]" style "todo_text" size 34 xalign 0.5 ypos 115
 
     # Selector de listas desplegable
@@ -368,7 +375,6 @@ screen view_tasks_screen():
         ypos 0.90
         spacing 40
 
-        textbutton "↩" action Show("main_todo", transition=page_flip_or_none) style "todo_button_small" text_style "todo_button_small_text"
         textbutton "Agregar tarea" action [SetVariable("show_list_dropdown", False), SetVariable("new_task_list", current_list), SetVariable("new_task_list_locked", True), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
 
     # Panel desplegable de listas (al final para que pinte encima de la lista)
@@ -506,13 +512,22 @@ screen add_task_screen():
             xmaximum 600
             yminimum 90
 
-            input:
-                value VariableInputValue("new_title")
-                length 40
-                size 40
-                color "#FFFFFF"
-                xalign 0.0
-                yalign 0.5
+            if renpy.variant("mobile"):
+                textbutton ("Escribe aquí..." if not new_title else new_title) action Function(prompt_new_title):
+                    style "subtask_button"
+                    text_style "todo_text"
+                    text_textalign 0.0
+                    xfill True
+            else:
+                input:
+                    value VariableInputValue("new_title")
+                    length 40
+                    size 40
+                    color "#FFFFFF"
+                    xalign 0.0
+                    yalign 0.5
+                    xfill True
+                    caret Solid("#FFD54F", xsize=4, ysize=40)
 
         textbutton "✓" action [Function(add_new_task, new_title, new_task_list, {"freq": new_rec_freq, "days": sorted(new_rec_days), "time": "%02d:%02d" % (new_rec_h, new_rec_m)} if new_rec_freq != "ninguna" else None), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("new_rec_freq", "ninguna"), SetVariable("new_rec_days", []), SetVariable("new_rec_h", 8), SetVariable("new_rec_m", 0), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Hide("add_task_screen", transition=page_flip_back_or_none)]:
             style "todo_button_small"
@@ -710,8 +725,9 @@ screen theme_screen():
     textbutton "↩" action Hide("theme_screen", transition=page_flip_back_or_none):
         style "todo_button_small"
         text_style "todo_button_small_text"
-        xalign 0.5
-        ypos 0.90
+        xalign 1.0
+        xoffset -30
+        ypos 30
 
 ################################################################################
 ## Pantalla: Progreso
@@ -763,8 +779,9 @@ screen progress_screen():
     textbutton "↩" action Hide("progress_screen", transition=page_flip_back_or_none):
         style "todo_button_small"
         text_style "todo_button_small_text"
-        xalign 0.5
-        ypos 0.90
+        xalign 1.0
+        xoffset -30
+        ypos 30
 
 ################################################################################
 ## Pantalla: Popup de recompensa (fruta + guía)
@@ -818,8 +835,9 @@ screen task_detail_screen(i):
         textbutton "↩" action Hide("task_detail_screen", transition=page_flip_back_or_none):
             style "todo_button_small"
             text_style "todo_button_small_text"
-            xalign 0.5
-            ypos 0.90
+            xalign 1.0
+            xoffset -30
+            ypos 30
     else:
         text "[t['title']]" style "todo_text" size 44 bold True xalign 0.5 ypos 140
 
@@ -896,6 +914,13 @@ screen task_detail_screen(i):
                 xmaximum 560
                 yminimum 90
 
+            if renpy.variant("mobile"):
+                textbutton ("Escribe aquí..." if not new_subtask else new_subtask) action Function(prompt_new_subtask):
+                    style "subtask_button"
+                    text_style "todo_text"
+                    text_textalign 0.0
+                    xfill True
+            else:
                 input:
                     value VariableInputValue("new_subtask")
                     length 60
@@ -903,6 +928,8 @@ screen task_detail_screen(i):
                     color "#FFFFFF"
                     xalign 0.0
                     yalign 0.5
+                    xfill True
+                    caret Solid("#FFD54F", xsize=4, ysize=40)
 
             textbutton "✓" action [Function(add_subtask, i, new_subtask), SetVariable("new_subtask", "")]:
                 style "todo_button_small"
@@ -925,8 +952,9 @@ screen task_detail_screen(i):
         textbutton "↩" action Hide("task_detail_screen", transition=page_flip_back_or_none):
             style "todo_button_small"
             text_style "todo_button_small_text"
-            xalign 0.5
-            ypos 0.90
+            xalign 1.0
+            xoffset -30
+            ypos 30
 
 ################################################################################
 ## Pantalla: Gestión de listas
@@ -1001,6 +1029,14 @@ screen lists_screen():
                 xmaximum 560
                 yminimum 90
 
+            if renpy.variant("mobile"):
+                textbutton ("Escribe aquí..." if not new_list_name else new_list_name) action Function(prompt_new_list_name):
+                    style "subtask_button"
+                    text_style "todo_text"
+                    text_size 36
+                    text_textalign 0.0
+                    xfill True
+            else:
                 input:
                     value VariableInputValue("new_list_name")
                     length 30
@@ -1008,6 +1044,8 @@ screen lists_screen():
                     color "#FFFFFF"
                     xalign 0.0
                     yalign 0.5
+                    xfill True
+                    caret Solid("#FFD54F", xsize=4, ysize=36)
 
             textbutton "✓" action [Function(rename_task_list, renaming_list, new_list_name), SetVariable("renaming_list", None), SetVariable("new_list_name", "")]:
                 style "todo_button_small"
@@ -1031,6 +1069,14 @@ screen lists_screen():
                 xmaximum 560
                 yminimum 90
 
+            if renpy.variant("mobile"):
+                textbutton ("Escribe aquí..." if not new_list_name else new_list_name) action Function(prompt_new_list_name):
+                    style "subtask_button"
+                    text_style "todo_text"
+                    text_size 36
+                    text_textalign 0.0
+                    xfill True
+            else:
                 input:
                     value VariableInputValue("new_list_name")
                     length 30
@@ -1038,6 +1084,8 @@ screen lists_screen():
                     color "#FFFFFF"
                     xalign 0.0
                     yalign 0.5
+                    xfill True
+                    caret Solid("#FFD54F", xsize=4, ysize=36)
 
             textbutton "✓" action [Function(add_task_list, new_list_name), SetVariable("new_list_name", "")]:
                 style "todo_button_small"
@@ -1051,8 +1099,9 @@ screen lists_screen():
     textbutton "↩" action Hide("lists_screen", transition=page_flip_back_or_none):
         style "todo_button_small"
         text_style "todo_button_small_text"
-        xalign 0.5
-        ypos 0.90
+        xalign 1.0
+        xoffset -30
+        ypos 30
 
 ################################################################################
 ## Pantalla: Elegir fecha límite
@@ -1134,8 +1183,9 @@ screen deadline_pick_screen(i, j=None):
     textbutton "↩" action Hide("deadline_pick_screen", transition=page_flip_back_or_none):
         style "todo_button_small"
         text_style "todo_button_small_text"
-        xalign 0.5
-        ypos 0.90
+        xalign 1.0
+        xoffset -30
+        ypos 30
 
 ################################################################################
 ## Pantalla: Calendario
@@ -1263,5 +1313,6 @@ screen calendar_screen():
     textbutton "↩" action Hide("calendar_screen", transition=page_flip_back_or_none):
         style "todo_button_small"
         text_style "todo_button_small_text"
-        xalign 0.5
-        ypos 0.90
+        xalign 1.0
+        xoffset -30
+        ypos 30
