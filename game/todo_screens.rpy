@@ -83,6 +83,10 @@ style todo_button_detail is todo_button:
     yminimum 58
     size_group "todo_detail_buttons"
 
+# Texto grande para botones de icono (✓ / ✕ junto a los inputs)
+style todo_button_icon_text is todo_button_text:
+    size 48
+
 style todo_title:
     size 64
     color "#FFFFFF"
@@ -368,20 +372,33 @@ screen add_task_screen():
 
     text "¿Qué quieres lograr?" style "todo_text" xalign 0.5 ypos 200
 
-    frame:
-        background Solid("#00000040")
-        padding (20, 15)
+    hbox:
         xalign 0.5
         ypos 280
-        xmaximum 760
+        spacing 16
 
-        input:
-            value VariableInputValue("new_title")
-            length 40
-            size 40
-            color "#FFFFFF"
-            xalign 0.0
-            yalign 0.5
+        frame:
+            background Solid("#00000040")
+            padding (20, 15)
+            xmaximum 600
+            yminimum 90
+
+            input:
+                value VariableInputValue("new_title")
+                length 40
+                size 40
+                color "#FFFFFF"
+                xalign 0.0
+                yalign 0.5
+
+        textbutton "✓" action [Function(add_new_task, new_title, new_task_list, {"freq": new_rec_freq, "days": sorted(new_rec_days), "time": "%02d:%02d" % (new_rec_h, new_rec_m)} if new_rec_freq != "ninguna" else None), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("new_rec_freq", "ninguna"), SetVariable("new_rec_days", []), SetVariable("new_rec_h", 8), SetVariable("new_rec_m", 0), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Hide("add_task_screen", transition=page_flip_back_or_none)]:
+            style "todo_button_small"
+            text_style "todo_button_icon_text"
+            yminimum 90
+        textbutton "✕" action [SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("new_rec_freq", "ninguna"), SetVariable("new_rec_days", []), SetVariable("new_rec_h", 8), SetVariable("new_rec_m", 0), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Hide("add_task_screen", transition=page_flip_back_or_none)]:
+            style "todo_button_small"
+            text_style "todo_button_icon_text"
+            yminimum 90
 
     if new_task_list_locked:
         text "Lista: [new_task_list.capitalize()]" style "todo_text" xalign 0.5 ypos 430
@@ -401,7 +418,6 @@ screen add_task_screen():
 
     $ freq = new_rec_freq
     $ time_y = 770 if freq == "diaria" else (850 if freq == "semanal" else 880)
-    $ btn_y = 660 if freq == "ninguna" else time_y + 200
 
     $ freq_label = {"ninguna": "Una vez", "diaria": "Diaria", "semanal": "Semanal", "mensual": "Mensual"}[new_rec_freq]
     $ rec_arrow = " ▴" if show_rec_dropdown else " ▾"
@@ -482,21 +498,6 @@ screen add_task_screen():
                 text_style "todo_button_small_text"
                 xminimum 90
                 yminimum 62
-
-    hbox:
-        xalign 0.5
-        ypos 1100
-        spacing 50
-
-        textbutton "Guardar":
-            action [Function(add_new_task, new_title, new_task_list, {"freq": new_rec_freq, "days": sorted(new_rec_days), "time": "%02d:%02d" % (new_rec_h, new_rec_m)} if new_rec_freq != "ninguna" else None), SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("new_rec_freq", "ninguna"), SetVariable("new_rec_days", []), SetVariable("new_rec_h", 8), SetVariable("new_rec_m", 0), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Hide("add_task_screen", transition=page_flip_back_or_none)]
-            style "todo_button"
-            text_style "todo_button_text"
-
-        textbutton "Cancelar":
-            action [SetVariable("new_title", ""), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("new_rec_freq", "ninguna"), SetVariable("new_rec_days", []), SetVariable("new_rec_h", 8), SetVariable("new_rec_m", 0), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Hide("add_task_screen", transition=page_flip_back_or_none)]
-            style "todo_button"
-            text_style "todo_button_text"
 
     # Panel desplegable de frecuencia (al final para que pinte encima)
     if show_rec_dropdown:
@@ -729,24 +730,33 @@ screen task_detail_screen(i):
                                     xminimum 90
 
         # Entrada para agregar subtarea
-        frame:
-            background Solid("#00000040")
-            padding (20, 15)
+        hbox:
             xalign 0.5
             ypos 760
-            xmaximum 760
+            spacing 16
 
-            input:
-                value VariableInputValue("new_subtask")
-                length 60
-                size 40
-                color "#FFFFFF"
-                xalign 0.0
-                yalign 0.5
+            frame:
+                background Solid("#00000040")
+                padding (20, 15)
+                xmaximum 560
+                yminimum 90
 
-        textbutton "Agregar" action [Function(add_subtask, i, new_subtask), SetVariable("new_subtask", "")] style "todo_button" text_style "todo_button_text":
-            xalign 0.5
-            ypos 880
+                input:
+                    value VariableInputValue("new_subtask")
+                    length 60
+                    size 40
+                    color "#FFFFFF"
+                    xalign 0.0
+                    yalign 0.5
+
+            textbutton "✓" action [Function(add_subtask, i, new_subtask), SetVariable("new_subtask", "")]:
+                style "todo_button_small"
+                text_style "todo_button_icon_text"
+                yminimum 90
+            textbutton "✕" action SetVariable("new_subtask", ""):
+                style "todo_button_small"
+                text_style "todo_button_icon_text"
+                yminimum 90
 
         $ rec_txt = recurrence_description(t)
         if rec_txt:
@@ -817,59 +827,63 @@ screen lists_screen():
     if renaming_list:
         text "Renombrando: [renaming_list]" style "todo_text" size 32 xalign 0.5 ypos 620
 
-        frame:
-            background Solid("#00000040")
-            padding (20, 15)
-            xalign 0.5
-            ypos 680
-            xmaximum 760
-
-            input:
-                value VariableInputValue("new_list_name")
-                length 30
-                size 36
-                color "#FFFFFF"
-                xalign 0.0
-                yalign 0.5
-
         hbox:
             xalign 0.5
-            ypos 800
-            spacing 30
+            ypos 680
+            spacing 16
 
-            textbutton "Guardar nombre":
-                action [Function(rename_task_list, renaming_list, new_list_name), SetVariable("renaming_list", None), SetVariable("new_list_name", "")]
-                style "todo_button"
-                text_style "todo_button_text"
+            frame:
+                background Solid("#00000040")
+                padding (20, 15)
+                xmaximum 560
+                yminimum 90
 
-            textbutton "Cancelar":
-                action [SetVariable("renaming_list", None), SetVariable("new_list_name", "")]
-                style "todo_button"
-                text_style "todo_button_text"
+                input:
+                    value VariableInputValue("new_list_name")
+                    length 30
+                    size 36
+                    color "#FFFFFF"
+                    xalign 0.0
+                    yalign 0.5
+
+            textbutton "✓" action [Function(rename_task_list, renaming_list, new_list_name), SetVariable("renaming_list", None), SetVariable("new_list_name", "")]:
+                style "todo_button_small"
+                text_style "todo_button_icon_text"
+                yminimum 90
+            textbutton "✕" action [SetVariable("renaming_list", None), SetVariable("new_list_name", "")]:
+                style "todo_button_small"
+                text_style "todo_button_icon_text"
+                yminimum 90
     else:
         text "Crea una nueva lista" style "todo_text" size 32 xalign 0.5 ypos 620
 
-        frame:
-            background Solid("#00000040")
-            padding (20, 15)
+        hbox:
             xalign 0.5
             ypos 680
-            xmaximum 760
+            spacing 16
 
-            input:
-                value VariableInputValue("new_list_name")
-                length 30
-                size 36
-                color "#FFFFFF"
-                xalign 0.0
-                yalign 0.5
+            frame:
+                background Solid("#00000040")
+                padding (20, 15)
+                xmaximum 560
+                yminimum 90
 
-        textbutton "Crear lista":
-            action [Function(add_task_list, new_list_name), SetVariable("new_list_name", "")]
-            style "todo_button"
-            text_style "todo_button_text"
-            xalign 0.5
-            ypos 800
+                input:
+                    value VariableInputValue("new_list_name")
+                    length 30
+                    size 36
+                    color "#FFFFFF"
+                    xalign 0.0
+                    yalign 0.5
+
+            textbutton "✓" action [Function(add_task_list, new_list_name), SetVariable("new_list_name", "")]:
+                style "todo_button_small"
+                text_style "todo_button_icon_text"
+                yminimum 90
+            textbutton "✕" action SetVariable("new_list_name", ""):
+                style "todo_button_small"
+                text_style "todo_button_icon_text"
+                yminimum 90
 
     textbutton "Volver" action Hide("lists_screen", transition=page_flip_back_or_none) style "todo_button" text_style "todo_button_text":
         xalign 0.5 
