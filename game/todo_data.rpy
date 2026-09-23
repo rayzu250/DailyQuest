@@ -25,6 +25,27 @@ init python:
     WEEKDAYS_ES = ["L", "M", "X", "J", "V", "S", "D"]
     WD_SHORT_ES = ["lun", "mar", "mié", "jue", "vie", "sáb", "dom"]
 
+    # Calcula el progreso y devuelve (avatar, mensaje) con refuerzo positivo:
+    # nunca regaña, solo anima
+    def get_guia_greeting():
+        total = 0
+        completed = 0
+        for task in store.tasks:
+            total += 1
+            if task.get("done", False):
+                completed += 1
+        if total == 0:
+            return ("guia_happy", "¡Hola! Crea tu primera tarea para empezar la aventura.")
+        ratio = completed / float(total)
+        if ratio == 0.0:
+            return ("guia_happy", "¡Un nuevo día! ¿Qué meta cumpliremos primero?")
+        elif ratio < 0.5:
+            return ("guia_encouraging", "¡Excelente inicio! Cada pequeño paso cuenta.")
+        elif ratio < 1.0:
+            return ("guia_cheering", "¡Llevas más de la mitad! ¡Eres genial!")
+        else:
+            return ("guia_star", "¡Misión cumplida por hoy! ¡A disfrutar el descanso!")
+
     # Crea una nueva tarea con todos los campos del modelo
     def new_task(title, task_list=None, priority=1, recurrence=None):
         return {

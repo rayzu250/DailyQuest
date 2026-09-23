@@ -123,6 +123,96 @@ style cal_day_text:
     size 34
     color "#FFFFFF"
 
+# Botón invisible para cerrar el drawer al tocar fuera
+style blank_button is empty
+
+# Botones del panel lateral (grupo propio para no heredar otros tamaños)
+style drawer_button:
+    background Frame(Solid("#FFFFFF"), 12, 12)
+    hover_background Frame(Solid("#FFD54F"), 12, 12)
+    padding (20, 12)
+    xminimum 360
+    yminimum 64
+    size_group "todo_drawer_buttons"
+
+style drawer_button_text:
+    size 30
+    color "#212121"
+    hover_color "#1B5E20"
+    textalign 0.5
+    xalign 0.5
+    yalign 0.5
+
+style drawer_button_close is drawer_button
+
+style drawer_button_close_text is drawer_button_text:
+    color "#EF5350"
+
+################################################################################
+## Pantalla: Panel lateral de navegación estilo cómic
+################################################################################
+
+screen navigation_drawer():
+    modal True
+
+    # Fondo para cerrar al tocar fuera
+    button:
+        style "blank_button"
+        xfill True yfill True
+        action Hide("navigation_drawer")
+
+    # Panel lateral con borde de acento del tema actual
+    frame:
+        at drawer_slide
+        xalign 0.0 yalign 0.0
+        xsize 460
+        yfill True
+        background Solid(themes[current_theme]["accent"])
+        padding (6, 6)
+
+        frame:
+            background Solid(themes[current_theme]["bg"])
+            padding (25, 30)
+            xfill True
+            yfill True
+
+            $ guia_img, guia_msg = get_guia_greeting()
+
+            vbox:
+                spacing 20
+
+                # Encabezado con la mascota
+                hbox:
+                    spacing 15
+                    add guia_img:
+                        xysize (75, 75)
+                        fit "contain"
+                        yalign 0.5
+                    vbox:
+                        text "Daily Quest" size 34 bold True color "#FFD54F"
+                        text "Tu compañero guía" size 22 color "#A5D6A7"
+
+                # Globo de diálogo estilo cómic
+                frame:
+                    background Solid("#FFFFFF1A")
+                    padding (15, 12)
+                    xfill True
+
+                    text "[guia_msg]" size 24 color "#FFFFFF" italic True
+
+                null height 10
+
+                # Opciones de navegación
+                textbutton "Mis Tareas" action [Hide("navigation_drawer"), SetVariable("show_list_dropdown", False), Show("view_tasks_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "Nueva Tarea" action [Hide("navigation_drawer"), SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "Calendario" action [Hide("navigation_drawer"), SetVariable("pick_year", None), SetVariable("pick_month", None), SetVariable("cal_selected", None), Show("calendar_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "Cambiar Mundo" action [Hide("navigation_drawer"), Show("theme_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+                textbutton "Mi Progreso" action [Hide("navigation_drawer"), Show("progress_screen", transition=page_flip_or_none)] style "drawer_button" text_style "drawer_button_text"
+
+                null height 20
+
+                textbutton "Cerrar" action Hide("navigation_drawer") style "drawer_button_close" text_style "drawer_button_close_text"
+
 ################################################################################
 ## Pantalla principal (Main Menu ToDo)
 ################################################################################
@@ -148,17 +238,30 @@ screen main_todo():
         text "★" size 52 color "#FFD700"
         text "[completed_tasks] estrellas" style "todo_text"
 
-    # Botones principales
-    vbox:
-        xalign 0.5
-        yalign 0.55
-        spacing 28
+    # Saludo de la guía según el progreso
+    $ guia_img_main, guia_msg_main = get_guia_greeting()
 
-        textbutton "Ver mis tareas" action Show("view_tasks_screen", transition=page_flip_or_none) style "todo_button" text_style "todo_button_text"
-        textbutton "Agregar nueva tarea" action [SetVariable("new_task_list", task_lists[0]), SetVariable("new_task_list_locked", False), SetVariable("show_rec_dropdown", False), SetVariable("show_add_task_list_dropdown", False), Show("add_task_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
-        textbutton "Ver calendario" action [SetVariable("pick_year", None), SetVariable("pick_month", None), SetVariable("cal_selected", None), Show("calendar_screen", transition=page_flip_or_none)] style "todo_button" text_style "todo_button_text"
-        textbutton "Cambiar tema" action Show("theme_screen", transition=page_flip_or_none) style "todo_button" text_style "todo_button_text"
-        textbutton "Ver mi progreso" action Show("progress_screen", transition=page_flip_or_none) style "todo_button" text_style "todo_button_text"
+    hbox:
+        xalign 0.5
+        ypos 330
+        spacing 20
+
+        add guia_img_main:
+            xysize (110, 110)
+            fit "contain"
+            yalign 0.5
+
+        frame:
+            background Solid("#FFFFFF22")
+            padding (20, 15)
+            xmaximum 560
+
+            text "[guia_msg_main]" style "todo_text" size 32 italic True
+
+    # Acceso principal al panel lateral
+    textbutton "☰ Menú" action Show("navigation_drawer") style "todo_button" text_style "todo_button_text":
+        xalign 0.5
+        ypos 520
 
     # Botón salir
     textbutton "Salir" action Return() style "todo_button" text_style "todo_button_text":
@@ -175,6 +278,12 @@ screen view_tasks_screen():
     add Solid(themes[current_theme]["bg"])
 
     text "Mis Tareas" style "todo_title" xalign 0.5 ypos 35
+
+    textbutton "☰" action Show("navigation_drawer"):
+        style "todo_button_detail"
+        text_style "todo_button_small_text"
+        xpos 30
+        ypos 30
 
     text "Lista: [current_list.capitalize()]" style "todo_text" size 34 xalign 0.5 ypos 115
 

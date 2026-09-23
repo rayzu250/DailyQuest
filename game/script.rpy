@@ -11,6 +11,10 @@ default persistent.page_flip_enabled = True
 # Placeholders visuales hasta que exista arte real
 image bg_room = Solid("#1B5E20")
 image guia happy = "images/guias/red.png"
+image guia_happy = "images/guias/guia_happy.png"
+image guia_encouraging = "images/guias/guia_encouraging.png"
+image guia_cheering = "images/guias/guia_cheering.png"
+image guia_star = "images/guias/guia_star.png"
 
 transform guia_center:
     xalign 0.5
@@ -72,6 +76,14 @@ transform page_flip_back(t=0.35, *, old_widget=None, new_widget=None):
         xzoom 1.0
         easein t xzoom 0.0
 
+# Animación de entrada y salida suave para el panel lateral
+transform drawer_slide:
+    on show:
+        xoffset -450 alpha 0.0
+        easein 0.25 xoffset 0 alpha 1.0
+    on hide:
+        easeout 0.20 xoffset -450 alpha 0.0
+
 init python:
     # Transiciones condicionales: respetan la bandera de Opciones
     def page_flip_or_none(old_widget=None, new_widget=None):
@@ -100,5 +112,5 @@ label start:
     jump main_menu_todo
 
 label main_menu_todo:
-    call screen main_todo
+    call screen view_tasks_screen
     return   
