@@ -97,6 +97,10 @@ init python:
         return None
 
 label start:
+    $ quick_menu = False
+    $ _game_menu_screen = None
+    if restore_quest_data():
+        jump main_menu_todo
     if not renpy.music.get_playing():
         play music "audio/Little_Notes_for_Big_Tasks.ogg" fadein 1.0
 
@@ -104,13 +108,17 @@ label start:
     show guia happy at guia_center
 
     e "¡Hola! Soy tu guía. ¿Cómo te llamas?"
-    $ player_name = renpy.input("Escribe tu nombre:", default="Amigo")
+    call screen quest_text_editor("player_name", "¿Cómo te llamas?", 30, onboarding=True)
     $ player_name = player_name.strip() or "Amigo"
+    $ save_quest_data()
 
     e "¡Genial, [player_name]! Vamos a aprender a organizar tus proyectos de forma divertida."
 
     jump main_menu_todo
 
 label main_menu_todo:
+    $ quick_menu = False
+    $ _game_menu_screen = None
+    $ migrate_quest_data()
     call screen view_tasks_screen
-    return   
+    return

@@ -26,6 +26,9 @@ define gui.show_name = False
 
 define config.version = "1.1"
 
+# Los pendientes se corrigen con acciones explícitas, no retrocediendo el diálogo.
+define config.rollback_enabled = False
+
 
 ## Texto situado en la pantalla 'Acerca de' del juego. Sitúa el texto entre
 ## comillas triples y deja una línea en blanco entre párrafos.
@@ -187,6 +190,9 @@ init python:
     build.classify('**/.**', None)
     build.classify('**/#**', None)
     build.classify('**/thumbs.db', None)
+    build.classify('game/tests/**', None)
+    build.classify('tests/**', None)
+    build.classify('docs/**', None)
 
     ## Para archivar, se clasifican como 'archive'.
 

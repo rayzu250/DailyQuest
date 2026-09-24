@@ -24,3 +24,7 @@
 /dialogue.tab
 /dialogue.txt
 /strings.json
+
+# Datos y capturas generados por pruebas locales.
+/tests/runtime-saves/
+/tests/screenshots/

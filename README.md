@@ -20,13 +20,20 @@ earns a random fruit with popup animation, guide celebration and sound.
 
 ## Structure
 
+La reorganización actual separa `game/core/` (estado, tareas, fechas,
+recurrencia y guardado) de `game/ui/` (navegación, editor de texto,
+formularios, listas, calendario y progreso). Los archivos `todo_data.rpy`
+y `todo_screens.rpy` quedan como indicadores de esta migración;
+`todo_system.rpy` conserva etiquetas para partidas antiguas.
+Consultar `docs/VALIDACION_CAMBIOS.md` para probar esta versión.
+
 - `game/script.rpy` — story flow, guide sprite, ATL transforms (`guia_center`,
   `reward_pop_up`, `guia_happy_bounce`, `guia_reward_bounce`).
-- `game/todo_data.rpy` — data model and helpers (tasks, subtasks with per-subtask
+- `game/core/` — data model and helpers (tasks, subtasks with per-subtask
   `deadline`/`fruit`, task-level `recurrence` rules with daily/weekly/monthly
   cycles where completing spawns the next dated copy, lists, calendar dates,
   migrations for old saves).
-- `game/todo_screens.rpy` — all ToDo screens and styles, plus the `reward_popup`
+- `game/ui/` — ToDo screens and styles, plus the `reward_popup`
   reward screen and the collapsible list dropdown.
 - `game/screens.rpy`, `game/gui.rpy`, `game/options.rpy` — Ren'Py defaults,
   enlarged for the 1080x1920 portrait layout.
