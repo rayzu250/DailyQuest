@@ -21,6 +21,7 @@ screen theme_screen():
 
 screen progress_screen():
     modal True
+    on "show" action Function(guide_progress)
 
     add Solid(themes[current_theme]["bg"])
 
@@ -51,11 +52,13 @@ screen progress_screen():
         text "[percent]%" style "todo_text" size 52
 
         if percent == 100 and total > 0:
-            text "¡Eres un campeón de los proyectos!" style "todo_text" color "#FFD700"
+            text "¡Completaste todas estas tareas!" style "todo_text" color "#FFD700"
         elif percent >= 50:
             text "¡Vas muy bien! Sigue así." style "todo_text"
         else:
             text "Cada tarea te acerca a tu meta." style "todo_text"
+
+    use quest_guide
 
 
 ################################################################################
@@ -64,27 +67,8 @@ screen progress_screen():
 
 screen reward_popup():
     zorder 100
-
-    # Solo pinta si hay recompensa pendiente (al desmarcar no molesta)
-    if last_reward:
-        button:
-            style "blank_button"
-            xfill True yfill True
-            action Hide("reward_popup")
-
-        add "images/fruits/%s.png" % last_reward:
-            at reward_pop_up
-            xalign 0.5
-            yalign 0.38
-            xysize (192, 192)
-            fit "contain"
-
-        add "images/guias/red.png":
-            at guia_reward_bounce
-            xalign 0.88
-            yalign 1.0
-
-        timer 1.2 action [SetVariable("last_reward", None), Hide("reward_popup")]
+    # Compatibilidad con partidas antiguas: ya no bloquear la pantalla.
+    timer 0.01 action Hide("reward_popup")
 
 ################################################################################
 ## Pantalla: Detalles de tarea (subtareas)

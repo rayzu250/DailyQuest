@@ -87,12 +87,12 @@ transform drawer_slide:
 init python:
     # Transiciones condicionales: respetan la bandera de Opciones
     def page_flip_or_none(old_widget=None, new_widget=None):
-        if persistent.page_flip_enabled:
+        if persistent.page_flip_enabled and persistent.quest_motion == "normal":
             return page_flip(old_widget=old_widget, new_widget=new_widget)
         return None
 
     def page_flip_back_or_none(old_widget=None, new_widget=None):
-        if persistent.page_flip_enabled:
+        if persistent.page_flip_enabled and persistent.quest_motion == "normal":
             return page_flip_back(old_widget=old_widget, new_widget=new_widget)
         return None
 

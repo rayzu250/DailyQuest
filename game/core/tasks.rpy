@@ -65,13 +65,15 @@ init python:
         title = title.strip()
         if title:
             store.tasks.append(new_task(title, task_list, recurrence=recurrence))
-            renpy.notify("¡Tarea agregada!")
+            guide_event("Ya anotaste lo que quieres hacer.")
 
     def complete_task(index):
         if 0 <= index < len(store.tasks):
             t = store.tasks[index]
             if not t["done"]:
+                first_completion = not t.get("celebrated", False)
                 t["done"] = True
+                t["celebrated"] = True
                 t["last_completed"] = today_tuple()
                 store.completed_tasks += 1
                 if t.get("recurrence") and not t.get("next_task_id"):
@@ -100,6 +102,10 @@ init python:
                         renpy.notify("¡Misión lista! +1 estrella ★")
                 else:
                     renpy.notify("¡Bien hecho! +1 estrella ★")
+                guide_event("¡Terminaste esta tarea!" if first_completion else "La tarea vuelve a estar completada.",
+                    "guia_star", celebrate=first_completion)
+                if not first_completion:
+                    store.guide_animated = False
             else:
                 # Reabre la tarea (la copia generada queda como historial)
                 t["done"] = False
@@ -107,6 +113,7 @@ init python:
                 if store.completed_tasks > 0:
                     store.completed_tasks -= 1
                 renpy.notify("Tarea reabierta")
+                guide_event("Puedes revisar los pasos que faltan.")
 
     # --- Subtareas ---
 
@@ -122,7 +129,7 @@ init python:
         text = text.strip()
         if text and 0 <= task_index < len(store.tasks):
             store.tasks[task_index].setdefault("subtasks", []).append({"text": text, "done": False, "deadline": None, "fruit": None})
-            renpy.notify("¡Subtarea agregada!")
+            guide_event("Dividir una tarea en pasos puede ayudarte a empezar.")
 
     def toggle_subtask(task_index, subtask_index):
         if not (0 <= task_index < len(store.tasks)):
@@ -132,15 +139,20 @@ init python:
             st = steps[subtask_index]
             new_state = not st.get("done", False)
             st["done"] = new_state
+            store.last_reward = None
             if new_state:
                 # Asigna fruta si no tiene una previa
-                if not st.get("fruit"):
+                first_completion = not st.get("fruit")
+                if first_completion:
                     st["fruit"] = random.choice(FRUITS)
-                store.last_reward = st["fruit"]
-                renpy.notify("¡Conseguiste una fruta!")
-                renpy.sound.play("audio/reward_ding.ogg")
+                    store.last_reward = st["fruit"]
+                completed = sum(1 for step in steps if step.get("done"))
+                guide_event("Completaste %d de %d pasos." % (completed, len(steps)),
+                    "guia_cheering", fruit=st["fruit"] if first_completion else None, celebrate=first_completion)
+                if not first_completion:
+                    store.guide_animated = False
             else:
-                store.last_reward = None
+                guide_event("Este paso queda pendiente para revisarlo.")
 
     def remove_subtask(task_index, subtask_index):
         if not 0 <= task_index < len(store.tasks):

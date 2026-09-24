@@ -6,6 +6,7 @@ init python:
         renpy.run(DisableAllInputValues())
         renpy.hide_screen("quest_text_editor")
         renpy.hide_screen("navigation_drawer")
+        renpy.hide_screen("quest_options")
         for name in QUEST_PAGES:
             renpy.hide_screen(name)
         store.show_list_dropdown = False
@@ -67,6 +68,7 @@ screen navigation_drawer():
             textbutton "Calendario" style "todo_button" action Function(quest_navigate, "calendar_screen")
             textbutton "Mis logros" style "todo_button" action Function(quest_navigate, "progress_screen")
             textbutton "Cambiar mundo" style "todo_button" action Function(quest_navigate, "theme_screen")
+            textbutton "Opciones" style "todo_button" action Function(open_quest_options)
             textbutton "Cerrar menú" style "todo_button" action Hide("navigation_drawer")
 
 screen main_todo():

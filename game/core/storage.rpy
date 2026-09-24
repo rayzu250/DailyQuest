@@ -21,6 +21,7 @@ init -2 python:
             task.setdefault("deadline", None)
             task.setdefault("recurrence", None)
             task.setdefault("last_completed", None)
+            task.setdefault("celebrated", task.get("done", False))
             for step in task["subtasks"]:
                 step.setdefault("id", new_quest_id())
                 step.setdefault("deadline", None)

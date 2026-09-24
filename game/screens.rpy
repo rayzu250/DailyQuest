@@ -735,89 +735,9 @@ style slot_button_text:
 ## https://www.renpy.org/doc/html/screen_special.html#preferences
 
 screen preferences():
-
     tag menu
-
-    use game_menu(_("Opciones"), scroll="viewport"):
-
-        vbox:
-
-            hbox:
-                box_wrap True
-
-                if renpy.variant("pc") or renpy.variant("web"):
-
-                    vbox:
-                        style_prefix "radio"
-                        label _("Pantalla")
-                        textbutton _("Ventana") action Preference("display", "window")
-                        textbutton _("Pantalla completa") action Preference("display", "fullscreen")
-
-                vbox:
-                    style_prefix "check"
-                    label _("Saltar")
-                    textbutton _("Texto no visto") action Preference("skip", "toggle")
-                    textbutton _("Tras elecciones") action Preference("after choices", "toggle")
-                    textbutton _("Transiciones") action InvertSelected(Preference("transitions", "toggle"))
-
-                vbox:
-                    style_prefix "check"
-                    label _("Efecto página")
-                    textbutton _("Pasar página") action ToggleField(persistent, "page_flip_enabled")
-
-                ## Aquí se pueden añadir 'vboxes' adicionales del tipo
-                ## "radio_pref" o "check_pref" para nuevas preferencias.
-
-            null height (4 * gui.pref_spacing)
-
-            hbox:
-                style_prefix "slider"
-                box_wrap True
-
-                vbox:
-
-                    label _("Veloc. texto")
-
-                    bar value Preference("text speed")
-
-                    label _("Veloc. autoavance")
-
-                    bar value Preference("auto-forward time")
-
-                vbox:
-
-                    if config.has_music:
-                        label _("Volumen música")
-
-                        hbox:
-                            bar value Preference("music volume")
-
-                    if config.has_sound:
-
-                        label _("Volumen sonido")
-
-                        hbox:
-                            bar value Preference("sound volume")
-
-                            if config.sample_sound:
-                                textbutton _("Prueba") action Play("sound", config.sample_sound)
-
-
-                    if config.has_voice:
-                        label _("Volumen voz")
-
-                        hbox:
-                            bar value Preference("voice volume")
-
-                            if config.sample_voice:
-                                textbutton _("Prueba") action Play("voice", config.sample_voice)
-
-                    if config.has_music or config.has_sound or config.has_voice:
-                        null height gui.pref_spacing
-
-                        textbutton _("Silenciar todo"):
-                            action Preference("all mute", "toggle")
-                            style "mute_all_button"
+    on "hide" action Function(renpy.save_persistent)
+    use quest_options_content(Return())
 
 
 style pref_label is gui_label

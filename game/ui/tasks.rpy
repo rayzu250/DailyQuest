@@ -14,6 +14,7 @@ init python:
 
 screen view_tasks_screen():
     modal True
+    on "show" action Function(guide_greet)
     add Solid(themes[current_theme]["bg"])
     text "Mis tareas" style "todo_title" xalign 0.5 ypos 45
     textbutton "Menú" style "todo_button_small" text_style "todo_button_small_text" xpos 35 ypos 145 action Show("navigation_drawer")
@@ -29,7 +30,7 @@ screen view_tasks_screen():
                 action SetVariable("task_filter", value)
     $ shown = visible_task_indices()
     viewport:
-        xpos 50 ypos 505 xsize 980 ysize 1060
+        xpos 50 ypos 505 xsize 980 ysize (940 if persistent.quest_guide_enabled else 1060)
         mousewheel True
         draggable True
         scrollbars "vertical"
@@ -61,7 +62,8 @@ screen view_tasks_screen():
                             spacing 20
                             textbutton ("Reabrir" if task["done"] else "Completar") style "todo_button_small" text_style "todo_button_small_text" action Function(complete_task, i)
                             textbutton "Ver pasos" style "todo_button_small" text_style "todo_button_small_text" action [SetVariable("new_subtask", ""), Show("task_detail_screen", i=i)]
-    textbutton "Agregar tarea" style "todo_button" text_style "todo_button_text" xalign 0.5 yalign 0.91 action Function(open_task_form)
+    textbutton "Agregar tarea" style "todo_button" text_style "todo_button_text" xalign 0.5 yalign 0.94 action Function(open_task_form)
+    use quest_guide
 
 screen task_detail_screen(i):
     modal True
@@ -71,7 +73,7 @@ screen task_detail_screen(i):
     $ task = tasks[i] if 0 <= i < len(tasks) else None
     if task is not None:
         viewport:
-            xpos 50 ypos 280 xsize 980 ysize 1240
+            xpos 50 ypos 280 xsize 980 ysize (1160 if persistent.quest_guide_enabled else 1240)
             mousewheel True
             draggable True
             scrollbars "vertical"
@@ -101,7 +103,7 @@ screen task_detail_screen(i):
                                 text date_tuple_to_string(step["deadline"]) size 30 color "#D5EEE4"
                             hbox:
                                 spacing 16
-                                textbutton ("Hecho ✓" if step["done"] else "Completar") style "todo_button_small" text_style "todo_button_small_text" action [Function(toggle_subtask, i, j), Show("reward_popup")]
+                                textbutton ("Hecho ✓" if step["done"] else "Completar") style "todo_button_small" text_style "todo_button_small_text" action Function(toggle_subtask, i, j)
                                 textbutton "Fecha" style "todo_button_small" text_style "todo_button_small_text" action Show("deadline_pick_screen", i=i, j=j)
                                 textbutton "Borrar" style "todo_button_small" text_style "todo_button_small_text" action Confirm("¿Borrar este paso?", Function(remove_subtask, i, j))
                 text "Agrega un paso pequeño" style "todo_text" size 36
@@ -114,7 +116,8 @@ screen task_detail_screen(i):
                 if task.get("recurrence"):
                     text recurrence_description(task) style "todo_text" size 32
                     textbutton "Quitar repetición" style "todo_button_small" text_style "todo_button_small_text" action Confirm("¿Dejar de repetir esta tarea?", Function(clear_recurrence, i))
-        textbutton ("Reabrir tarea" if task["done"] else "Completar tarea") style "todo_button" text_style "todo_button_text" xalign 0.5 yalign 0.91 action Function(complete_task, i)
+        textbutton ("Reabrir tarea" if task["done"] else "Completar tarea") style "todo_button" text_style "todo_button_text" xalign 0.5 yalign 0.94 action Function(complete_task, i)
+        use quest_guide
 
 screen move_task_screen(i):
     modal True
