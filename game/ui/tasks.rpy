@@ -14,6 +14,8 @@ init python:
 
 screen view_tasks_screen():
     modal True
+    if renpy.android:
+        timer 2.0 repeat True action Function(quest_poll_reminders)
     on "show" action Function(guide_greet)
     add Solid(themes[current_theme]["bg"])
     text "Mis tareas" style "todo_title" xalign 0.5 ypos 45
@@ -87,6 +89,9 @@ screen task_detail_screen(i):
                     textbutton "Mover a lista" style "todo_button_small" text_style "todo_button_small_text" action Show("move_task_screen", i=i)
                 if valid_date(task.get("deadline")):
                     text date_tuple_to_string(task["deadline"]) style "todo_text" size 32
+                textbutton "Hora y recordatorio" style "todo_button_small" text_style "todo_button_small_text" action Show("task_reminder_screen", i=i)
+                if quest_task_time(task):
+                    text ("Hora: " + quest_task_time(task) + (" · Aviso activado" if task.get("reminder") else "")) style "todo_text" size 32
                 for j, step in enumerate(task.get("subtasks", [])):
                     frame:
                         background Solid("#17352D")

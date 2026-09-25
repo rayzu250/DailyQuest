@@ -22,6 +22,8 @@ init -2 python:
             task.setdefault("recurrence", None)
             task.setdefault("last_completed", None)
             task.setdefault("celebrated", task.get("done", False))
+            task.setdefault("time", (task.get("recurrence") or {}).get("time", ""))
+            task.setdefault("reminder", False)
             for step in task["subtasks"]:
                 step.setdefault("id", new_quest_id())
                 step.setdefault("deadline", None)
@@ -42,6 +44,7 @@ init -2 python:
         migrate_quest_data()
         store.persistent.quest_document = quest_document()
         renpy.save_persistent()
+        quest_sync_reminders()
 
     def restore_quest_data():
         document = store.persistent.quest_document
@@ -58,6 +61,7 @@ init -2 python:
         if store.current_theme not in store.themes:
             store.current_theme = "bosque"
         migrate_quest_data()
+        quest_sync_reminders(force=True)
         return True
 
     def quest_autosaved(operation):

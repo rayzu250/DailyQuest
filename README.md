@@ -26,6 +26,8 @@ formularios, listas, calendario y progreso). Los archivos `todo_data.rpy`
 y `todo_screens.rpy` quedan como indicadores de esta migración;
 `todo_system.rpy` conserva etiquetas para partidas antiguas.
 Consultar `docs/VALIDACION_CAMBIOS.md` para probar esta versión.
+Los horarios y avisos del teléfono se documentan en `docs/RECORDATORIOS_ANDROID.md`;
+su compilación requiere preparar las plantillas del SDK como indica ese documento.
 
 - `game/script.rpy` — story flow, guide sprite, ATL transforms (`guia_center`,
   `reward_pop_up`, `guia_happy_bounce`, `guia_reward_bounce`).

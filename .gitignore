@@ -28,3 +28,7 @@
 # Datos y capturas generados por pruebas locales.
 /tests/runtime-saves/
 /tests/screenshots/
+/tests/java-build/
+/dist/
+/tests/android-build.log
+/tests/android-gradle.log

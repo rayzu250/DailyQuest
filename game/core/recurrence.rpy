@@ -76,9 +76,14 @@ init python:
         if 0 <= task_index < len(store.tasks):
             if freq == "ninguna":
                 store.tasks[task_index]["recurrence"] = None
+                if not valid_date(store.tasks[task_index].get("deadline")):
+                    store.tasks[task_index]["reminder"] = False
                 renpy.notify("Repetición eliminada")
             else:
                 store.tasks[task_index]["recurrence"] = {"freq": freq, "days": sorted(days), "time": time_txt}
+                store.tasks[task_index]["time"] = time_txt
+                if not quest_time_parts(time_txt):
+                    store.tasks[task_index]["reminder"] = False
                 renpy.notify("Repetición guardada")
 
     def clear_recurrence(task_index):

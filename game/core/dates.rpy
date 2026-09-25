@@ -30,6 +30,8 @@ init python:
             return
         if 0 <= task_index < len(store.tasks):
             store.tasks[task_index]["deadline"] = dtuple
+            if dtuple is None and not store.tasks[task_index].get("recurrence"):
+                store.tasks[task_index]["reminder"] = False
             renpy.notify("Fecha límite actualizada" if dtuple else "Fecha límite eliminada")
 
     def set_subtask_deadline(task_index, subtask_index, dtuple):

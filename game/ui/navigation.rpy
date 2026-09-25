@@ -7,6 +7,7 @@ init python:
         renpy.hide_screen("quest_text_editor")
         renpy.hide_screen("navigation_drawer")
         renpy.hide_screen("quest_options")
+        renpy.hide_screen("task_reminder_screen")
         for name in QUEST_PAGES:
             renpy.hide_screen(name)
         store.show_list_dropdown = False
@@ -23,6 +24,8 @@ init python:
         store.new_rec_days = []
         store.new_rec_h = 8
         store.new_rec_m = 0
+        store.new_has_time = False
+        store.new_reminder = False
         quest_navigate("add_task_screen")
 
     def save_task_form():
@@ -34,10 +37,16 @@ init python:
             return
         recurrence = None
         if store.new_rec_freq != "ninguna":
-            recurrence = {"freq": store.new_rec_freq, "days": sorted(store.new_rec_days), "time": ""}
+            recurrence = {"freq": store.new_rec_freq, "days": sorted(store.new_rec_days), "time": "%02d:%02d" % (store.new_rec_h, store.new_rec_m) if store.new_has_time else ""}
         add_new_task(store.new_title, store.new_task_list, recurrence)
+        task = store.tasks[-1]
+        task["time"] = "%02d:%02d" % (store.new_rec_h, store.new_rec_m) if store.new_has_time else ""
+        task["reminder"] = bool(recurrence and store.new_has_time and store.new_reminder)
+        save_quest_data()
         store.new_title = ""
         quest_navigate()
+        if task["reminder"]:
+            renpy.notify(quest_reminder_status())
 
 screen quest_header(title):
     text title style "todo_title" size 54 xalign 0.5 ypos 50

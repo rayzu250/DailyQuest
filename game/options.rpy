@@ -193,6 +193,8 @@ init python:
     build.classify('game/tests/**', None)
     build.classify('tests/**', None)
     build.classify('docs/**', None)
+    build.classify('android/**', None)
+    build.classify('tools/**', None)
 
     ## Para archivar, se clasifican como 'archive'.
 

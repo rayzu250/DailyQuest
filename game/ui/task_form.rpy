@@ -45,6 +45,29 @@ screen add_task_screen():
                                     action Function(toggle_new_rec_day, day)
                             else:
                                 null
+                textbutton "Asignar una hora":
+                    style "todo_button"
+                    selected new_has_time
+                    action ToggleVariable("new_has_time")
+                if new_has_time:
+                    text ("Hora prevista: %02d:%02d" % (new_rec_h, new_rec_m)) style "todo_text" size 40
+                    hbox:
+                        spacing 20
+                        textbutton "Hora −" style "todo_button_small" text_style "todo_button_small_text" action Function(bump_new_rec_h, -1)
+                        textbutton "Hora +" style "todo_button_small" text_style "todo_button_small_text" action Function(bump_new_rec_h, 1)
+                    hbox:
+                        spacing 20
+                        textbutton "Minuto −" style "todo_button_small" text_style "todo_button_small_text" action Function(bump_new_rec_m, -1)
+                        textbutton "Minuto +" style "todo_button_small" text_style "todo_button_small_text" action Function(bump_new_rec_m, 1)
+                    if new_rec_freq != "ninguna":
+                        textbutton "Recordarme en el teléfono":
+                            style "todo_button"
+                            text_size 34
+                            selected new_reminder
+                            action ToggleVariable("new_reminder")
+                    else:
+                        text "Para un aviso de una sola vez, guarda la tarea y elige Fecha y Hora y recordatorio." style "todo_text" size 30
+                    text quest_reminder_status() style "todo_text" size 30
     textbutton "Guardar tarea":
         style "todo_button"
         text_style "todo_button_text"

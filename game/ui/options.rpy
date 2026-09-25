@@ -60,6 +60,11 @@ screen quest_options_content(back_action):
                 style "quest_option_button"
                 action ToggleLocalVariable("advanced")
             if advanced:
+                text "Recordatorios del teléfono" style "quest_option_heading"
+                text quest_reminder_status() style "quest_option_hint"
+                if renpy.android:
+                    textbutton "Permitir avisos" style "quest_option_button" action Function(quest_reminder_permission)
+                    textbutton "Permitir horarios puntuales" style "quest_option_button" action Function(quest_exact_permission)
                 if renpy.variant("pc"):
                     text "Pantalla" style "quest_option_heading"
                     hbox:

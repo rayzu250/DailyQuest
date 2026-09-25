@@ -59,6 +59,8 @@ init python:
             "recurrence": recurrence,
             "last_completed": None,
             "next_task_id": None,
+            "time": (recurrence or {}).get("time", ""),
+            "reminder": False,
         }
 
     def add_new_task(title, task_list=None, recurrence=None):
@@ -96,6 +98,8 @@ init python:
                             "deadline": tuple(nxt),
                             "recurrence": dict(t["recurrence"]),
                             "last_completed": None,
+                            "time": quest_task_time(t),
+                            "reminder": t.get("reminder", False),
                         })
                         renpy.notify("¡Misión lista! +1 estrella ★ Ya generé la próxima")
                     else:
