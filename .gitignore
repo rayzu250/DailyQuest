@@ -32,3 +32,13 @@
 /dist/
 /tests/android-build.log
 /tests/android-gradle.log
+
+# Configuración y claves locales de firma Android.
+/android.json
+*.keystore
+*.jks
+
+# Capturas de revisión y material de presentación local.
+/Correcciones/
+/DailyQuest_presentacion_YouTube.mp4
+/DailyQuest_presentacion_YouTube.pptx
