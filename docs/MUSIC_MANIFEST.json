@@ -1,0 +1,112 @@
+[
+  {
+    "file": "game/audio/themes/forest.ogg",
+    "title": "Senderos tranquilos",
+    "bpm": 70,
+    "seconds": 137.143,
+    "sample_rate": 32000,
+    "peak_dbfs": -6.14,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.004132,
+    "sha256": "62186b4543e294cc3495d10d74b3142b1a1a1a675ea8328e40b714d419392d7b"
+  },
+  {
+    "file": "game/audio/themes/ocean.ogg",
+    "title": "Corrientes suaves",
+    "bpm": 64,
+    "seconds": 150.0,
+    "sample_rate": 32000,
+    "peak_dbfs": -5.82,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.002866,
+    "sha256": "87b2a40f803280ca4764d66b3f5499ec53770f8ea028050cf56ca25306561cd2"
+  },
+  {
+    "file": "game/audio/themes/sunset.ogg",
+    "title": "Luz de la tarde",
+    "bpm": 76,
+    "seconds": 126.316,
+    "sample_rate": 32000,
+    "peak_dbfs": -6.89,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.006184,
+    "sha256": "cb0a5805626f1b35d1aaee968a3e6e1c56ed6463dd89141f27d003759fa866b0"
+  },
+  {
+    "file": "game/audio/themes/night.ogg",
+    "title": "Órbita serena",
+    "bpm": 62,
+    "seconds": 154.839,
+    "sample_rate": 32000,
+    "peak_dbfs": -6.03,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.007588,
+    "sha256": "f2da1bbb7d02d5e43b8057c9dfe83a085b87329b59e593baf68bf199db673e29"
+  },
+  {
+    "file": "game/audio/themes/prehistoric.ogg",
+    "title": "Valle del alba",
+    "bpm": 74,
+    "seconds": 129.73,
+    "sample_rate": 32000,
+    "peak_dbfs": -6.63,
+    "rms_dbfs": -20.98,
+    "seam_delta": 0.00593,
+    "sha256": "919dcb9835be3dccf1738d93d76ae0ea5e51ad4766252bc9677175e2f2f2d211"
+  },
+  {
+    "file": "game/audio/themes/garden.ogg",
+    "title": "Brotes de luz",
+    "bpm": 68,
+    "seconds": 141.176,
+    "sample_rate": 32000,
+    "peak_dbfs": -6.99,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.000542,
+    "sha256": "7e54d42fa9d1b843bccf88ea23844dd0eb2d1f09cf447b5967a1f6334ff8b5d7"
+  },
+  {
+    "file": "game/audio/themes/robots.ogg",
+    "title": "Pequeños circuitos",
+    "bpm": 80,
+    "seconds": 120.0,
+    "sample_rate": 32000,
+    "peak_dbfs": -6.96,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.004928,
+    "sha256": "0f6145986668b9e638a71354168ef1e13bfe75fd04eb7e06300cae8da5ef7253"
+  },
+  {
+    "file": "game/audio/themes/secondary/mecha.ogg",
+    "title": "Horizonte Atlas",
+    "bpm": 108,
+    "seconds": 142.222,
+    "sample_rate": 32000,
+    "peak_dbfs": -8.0,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.003577,
+    "sha256": "c8a46e93ea36f6a320339b5006e157c72eedfe64a6f8499e02905dde3bc7ff91"
+  },
+  {
+    "file": "game/audio/themes/secondary/arcane.ogg",
+    "title": "Páginas del cielo",
+    "bpm": 98,
+    "seconds": 137.143,
+    "sample_rate": 32000,
+    "peak_dbfs": -7.98,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.009096,
+    "sha256": "6b46bc83712f74250cc7605235e74533056efed06b336addc2374ceb0ea26a27"
+  },
+  {
+    "file": "game/audio/themes/secondary/stage.ogg",
+    "title": "Antes del escenario",
+    "bpm": 114,
+    "seconds": 134.737,
+    "sample_rate": 32000,
+    "peak_dbfs": -7.55,
+    "rms_dbfs": -20.97,
+    "seam_delta": 0.009001,
+    "sha256": "16f0c7620b046b8ff9843d25d0692097f8f44f79b9bd9b658dbe2ddb00ba143f"
+  }
+]
