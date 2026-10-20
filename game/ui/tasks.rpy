@@ -58,6 +58,7 @@ screen view_tasks_screen():
                     vbox:
                         spacing 18
                         textbutton task["title"]:
+                            substitute False
                             text_size 40
                             text_color "#FFFFFF"
                             xfill True
@@ -90,7 +91,7 @@ screen task_detail_screen(i):
             vbox:
                 spacing 24
                 xsize 930
-                text task["title"] style "todo_text" size 46
+                text task["title"] style "todo_text" size 46 substitute False
                 if quest_secondary():
                     use quest_expedition_controls(i, task)
                 hbox:

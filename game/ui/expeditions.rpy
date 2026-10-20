@@ -175,9 +175,13 @@ screen quest_world_hub():
                             xfill True
                             vbox:
                                 spacing 16
+                                $ room_role = quest_base_role(world, number)
+                                add ("images/base_rooms/" + room_role + ".png") xysize (180, 120) fit "contain"
                                 text caption size 36 color "#FFFFFF"
+                                text QUEST_BASE_DESCRIPTIONS[room_role] size 28 color "#D5EEE4"
                                 if number in unlocked:
                                     text "✓ Disponible en tu base" size 30 color "#A9E8C4"
+                                    textbutton "Entrar" style "todo_button_small" text_size 32 action Function(quest_base_open, world, number)
                                 else:
                                     textbutton "Desbloquear · 3" style "todo_button_small" text_size 30 sensitive quest_world_balance(world) >= 3 action Function(quest_unlock_upgrade, world, number)
                     text "Tus recursos y mejoras se conservan al cambiar de etapa o mundo." style "todo_text" size 28
