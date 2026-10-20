@@ -1,6 +1,7 @@
 screen task_reminder_screen(i):
     modal True
     zorder 140
+    on "show" action SetVariable("reminder_form_error", "")
     default has_time = bool(quest_time_parts(quest_task_time(tasks[i])))
     default hour = (quest_time_parts(quest_task_time(tasks[i])) or (8, 0))[0]
     default minute = (quest_time_parts(quest_task_time(tasks[i])) or (8, 0))[1]
@@ -17,6 +18,12 @@ screen task_reminder_screen(i):
             xsize 890
             spacing 32
             text tasks[i]["title"] style "quest_option_text"
+            if reminder_form_error:
+                text reminder_form_error size 36 color "#FFE5A0"
+            text ("Fecha de la tarea: " + date_tuple_to_string(tasks[i].get("deadline"))) style "quest_option_text"
+            textbutton "Fecha del aviso" style "quest_option_button" action [SetVariable("reminder_form_error", ""), Show("deadline_pick_screen", i=i)]
+            if tasks[i].get("recurrence"):
+                text ("Repetición: " + recurrence_description(tasks[i])) style "quest_option_hint"
             textbutton "Asignar una hora":
                 style "quest_option_button"
                 selected has_time
@@ -36,7 +43,7 @@ screen task_reminder_screen(i):
                     selected enabled
                     action ToggleScreenVariable("enabled")
             if not tasks[i].get("recurrence") and not valid_date(tasks[i].get("deadline")):
-                text "Para recibir un aviso, vuelve a Mis pasos y elige Fecha." style "quest_option_hint"
+                text "Para recibir un aviso, elige Fecha del aviso. Las fechas de los pasos son independientes." style "quest_option_hint"
             elif tasks[i].get("recurrence"):
                 text "Se avisará en los días elegidos, aunque el juego esté cerrado." style "quest_option_hint"
             text "Los horarios usan el reloj del teléfono (00:00 a 23:59). Las horas pasadas no generan avisos atrasados." style "quest_option_hint"

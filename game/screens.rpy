@@ -1198,7 +1198,8 @@ style skip_triangle:
 
 screen notify(message):
 
-    zorder 100
+    # Los errores deben verse por encima de los formularios modales.
+    zorder 300
     style_prefix "notify"
 
     frame at notify_appear:

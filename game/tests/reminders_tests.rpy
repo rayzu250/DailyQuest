@@ -62,3 +62,34 @@ testsuite reminders:
         click "Cancelar"
         python:
             assert tasks[0]["time"] == "09:01"
+
+    testcase validation_and_task_date:
+        python:
+            add_new_task("Preparar exposición")
+            add_subtask(0, "Leer el tema")
+            set_subtask_deadline(0, 0, (2030, 1, 1))
+        run Show("task_reminder_screen", i=0)
+        click "Asignar una hora"
+        click "Recordarme en el teléfono"
+        click "Guardar horario"
+        assert screen "task_reminder_screen"
+        assert screen "notify"
+        python:
+            assert reminder_form_error and not tasks[0]["reminder"]
+            assert renpy.get_screen("notify").zorder > renpy.get_screen("task_reminder_screen").zorder
+        pause 0.4
+        screenshot "reminder-visible-validation"
+        run Hide("notify")
+        click "Fecha del aviso"
+        assert screen "deadline_pick_screen"
+        python:
+            assert renpy.get_screen("deadline_pick_screen").zorder > renpy.get_screen("task_reminder_screen").zorder
+            set_deadline(0, (2030, 1, 2))
+        run Hide("deadline_pick_screen")
+        click "Guardar horario"
+        assert not screen "task_reminder_screen"
+        python:
+            assert not reminder_form_error
+            assert tasks[0]["reminder"] and tasks[0]["time"] == "08:00"
+            assert quest_reminder_payload()[0]["start"] == "2030-01-02"
+            assert persistent.quest_document["tasks"][0]["time"] == "08:00"

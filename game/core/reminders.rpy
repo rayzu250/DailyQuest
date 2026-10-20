@@ -2,6 +2,7 @@
 default new_has_time = False
 default new_reminder = False
 default reminder_error = ""
+default reminder_form_error = ""
 
 init -1 python:
     def quest_time_parts(value):
@@ -117,11 +118,14 @@ init -1 python:
             pass
 
     def save_task_reminder(index, has_time, hour, minute, enabled):
+        store.reminder_form_error = ""
         if not 0 <= index < len(store.tasks):
+            store.reminder_form_error = "La tarea ya no está disponible. Cierra esta pantalla y vuelve a abrirla."
             return
         task = store.tasks[index]
         if enabled and (not has_time or (not task.get("recurrence") and not valid_date(task.get("deadline")))):
-            renpy.notify("Elige una hora y una fecha, o una repetición.")
+            store.reminder_form_error = "Falta una fecha para esta tarea. Elige Fecha del aviso aquí; la fecha de un paso no programa el aviso de la tarea."
+            renpy.notify(store.reminder_form_error)
             return
         task["time"] = "%02d:%02d" % (hour, minute) if has_time else ""
         task["reminder"] = bool(enabled and has_time)
@@ -130,7 +134,9 @@ init -1 python:
         save_quest_data()
         renpy.hide_screen("task_reminder_screen")
         if enabled:
-            renpy.notify(quest_reminder_status())
+            renpy.notify("Horario guardado. " + quest_reminder_status())
+        else:
+            renpy.notify("Horario guardado sin aviso en el teléfono.")
 
     config.after_load_callbacks.append(lambda: quest_sync_reminders(force=True))
 

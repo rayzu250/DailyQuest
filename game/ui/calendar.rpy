@@ -1,5 +1,6 @@
 screen deadline_pick_screen(i, j=None):
     modal True
+    zorder 150
 
     add get_theme_bg()
 
