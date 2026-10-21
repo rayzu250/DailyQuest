@@ -44,7 +44,7 @@ init -2 python:
             return
         if name == "quest_motion" and value not in ("normal", "reduced", "off"):
             return
-        if name not in ("school_stage", "quest_motion", "quest_guide_enabled", "page_flip_enabled"):
+        if name not in ("school_stage", "quest_motion", "quest_guide_enabled"):
             return
         if name == "school_stage":
             # En el menú inicial, store todavía puede estar vacío: recuperar antes de guardar.

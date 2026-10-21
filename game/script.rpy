@@ -5,8 +5,8 @@ default player_name = "Amigo"
 default completed_tasks = 0
 default current_theme = "bosque"
 
-# Bandera para activar o desactivar el efecto de pasar página (se cambia en Opciones)
-default persistent.page_flip_enabled = True
+# Preferencia antigua conservada únicamente por compatibilidad.
+default persistent.page_flip_enabled = False
 
 # Placeholders visuales hasta que exista arte real
 image bg_room = Solid("#1B5E20")
@@ -49,33 +49,6 @@ transform guia_reward_bounce:
     easein 0.08 yoffset -20
     easeout 0.08 yoffset 0
 
-# Efecto de pasar página hacia adelante (lomo a la izquierda): la página
-# actual se pliega y revela la nueva debajo, como en un cuento o cómic
-transform page_flip(t=0.35, *, old_widget=None, new_widget=None):
-    delay t
-    contains:
-        new_widget
-        events False
-    contains:
-        old_widget
-        events False
-        xalign 0.0 yalign 0.5
-        xzoom 1.0
-        easein t xzoom 0.0
-
-# Efecto de pasar página hacia atrás (lomo a la derecha) para los "Volver"
-transform page_flip_back(t=0.35, *, old_widget=None, new_widget=None):
-    delay t
-    contains:
-        new_widget
-        events False
-    contains:
-        old_widget
-        events False
-        xalign 1.0 yalign 0.5
-        xzoom 1.0
-        easein t xzoom 0.0
-
 # Animación de entrada y salida suave para el panel lateral
 transform drawer_slide:
     on show:
@@ -85,15 +58,11 @@ transform drawer_slide:
         easeout 0.20 xoffset -450 alpha 0.0
 
 init python:
-    # Transiciones condicionales: respetan la bandera de Opciones
+    # Compatibilidad con llamadas antiguas: la navegación ya no aplica el efecto.
     def page_flip_or_none(old_widget=None, new_widget=None):
-        if persistent.page_flip_enabled and persistent.quest_motion == "normal":
-            return page_flip(old_widget=old_widget, new_widget=new_widget)
         return None
 
     def page_flip_back_or_none(old_widget=None, new_widget=None):
-        if persistent.page_flip_enabled and persistent.quest_motion == "normal":
-            return page_flip_back(old_widget=old_widget, new_widget=new_widget)
         return None
 
 # Entrar por la acción oficial para salir correctamente del contexto de menú.

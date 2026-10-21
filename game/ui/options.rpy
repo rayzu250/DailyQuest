@@ -51,11 +51,6 @@ screen quest_options_content(back_action):
                 style "quest_option_button"
                 selected persistent.quest_guide_enabled
                 action Function(quest_setting, "quest_guide_enabled", not persistent.quest_guide_enabled)
-            textbutton "Efecto de pasar página":
-                style "quest_option_button"
-                selected persistent.page_flip_enabled
-                action Function(quest_setting, "page_flip_enabled", not persistent.page_flip_enabled)
-            text "El efecto de página solo se usa con animaciones normales." style "quest_option_hint"
             textbutton ("Ocultar otras opciones" if advanced else "Otras opciones"):
                 style "quest_option_button"
                 action ToggleLocalVariable("advanced")
