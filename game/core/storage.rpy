@@ -139,7 +139,7 @@ init -2 python:
 
 init 10 python:
     # Un único límite de guardado para operaciones que cambian los pendientes.
-    for _operation_name in ("add_new_task", "complete_task", "add_subtask", "toggle_subtask",
+    for _operation_name in ("add_new_task", "rename_task", "complete_task", "add_subtask", "toggle_subtask",
             "remove_subtask", "delete_task", "close_recurrence_series", "add_task_list", "rename_task_list",
             "delete_task_list", "move_task", "set_deadline", "set_subtask_deadline", "set_recurrence"):
         setattr(store, _operation_name, quest_autosaved(getattr(store, _operation_name)))

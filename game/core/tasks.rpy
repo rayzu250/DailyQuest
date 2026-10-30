@@ -67,6 +67,17 @@ init python:
             store.tasks.append(new_task(title, task_list, recurrence=recurrence))
             guide_event("Ya anotaste lo que quieres hacer.")
 
+    def rename_task(task_index, title):
+        title = title.strip()
+        if not title:
+            renpy.notify("Escribe el nombre de tu tarea.")
+            return False
+        if not 0 <= task_index < len(store.tasks):
+            return False
+        store.tasks[task_index]["title"] = title
+        renpy.notify("Tarea renombrada")
+        return True
+
     def complete_task(index):
         if 0 <= index < len(store.tasks):
             t = store.tasks[index]

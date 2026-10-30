@@ -99,6 +99,7 @@ screen task_detail_screen(i):
                     textbutton "Fecha" style "todo_button_small" text_style "todo_button_small_text" action Show("deadline_pick_screen", i=i)
                     textbutton "Mover a lista" style "todo_button_small" text_style "todo_button_small_text" action Show("move_task_screen", i=i)
                     textbutton _("Eliminar tarea") style "todo_button_small" text_style "todo_button_small_text" action Confirm(_("¿Borrar esta tarea para siempre?"), [Function(delete_task, i), Hide("task_detail_screen")])
+                    textbutton "Renombrar tarea" style "todo_button_small" text_style "todo_button_small_text" action Function(open_rename_task_form, i)
                 if valid_date(task.get("deadline")):
                     text date_tuple_to_string(task["deadline"]) style "todo_text" size 32
                 textbutton "Hora y recordatorio" style "todo_button_small" text_style "todo_button_small_text" action Show("task_reminder_screen", i=i)
@@ -139,6 +140,24 @@ screen task_detail_screen(i):
                     textbutton _("Cerrar serie") style "todo_button_small" text_style "todo_button_small_text" action Confirm(_series_text, [Function(close_recurrence_series, i), Hide("task_detail_screen")])
         textbutton ("Reabrir tarea" if task["done"] else ("Finalizar misión" if quest_secondary() else "Completar tarea")) style "todo_button" text_style "todo_button_text" xalign 0.5 yalign 0.94 action Function(complete_task, i)
         use quest_guide
+
+screen rename_task_screen(i):
+    modal True
+    zorder 140
+    key "game_menu" action Hide("rename_task_screen")
+    add Solid("#000000CC")
+    frame:
+        xalign 0.5 yalign 0.35 xsize 900
+        padding (32, 32)
+        background get_theme_panel()
+        vbox:
+            spacing 28
+            text "Cambiar nombre de tarea" style "todo_text" size 42
+            use quest_text_field("task_title_draft", "Nombre de la tarea", 80)
+            hbox:
+                spacing 24
+                textbutton "Guardar nombre" style "todo_button_small" text_style "todo_button_small_text" sensitive bool(task_title_draft.strip()) action Function(save_task_title_form, i)
+                textbutton "Cancelar" style "todo_button_small" text_style "todo_button_small_text" action Hide("rename_task_screen")
 
 screen move_task_screen(i):
     modal True

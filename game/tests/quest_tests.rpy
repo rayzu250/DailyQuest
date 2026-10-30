@@ -53,6 +53,13 @@ testsuite quest:
             assert count_deadlines_on(tuple(tasks[1]["deadline"])) == len(calendar_entries(tuple(tasks[1]["deadline"])))
             add_task_list("Escuela")
             move_task(1, "Escuela")
+            before_title_change = quest_document()
+            assert rename_task(1, "Leer cada día")
+            assert tasks[1]["title"] == "Leer cada día"
+            assert tasks[1]["id"] == before_title_change["tasks"][1]["id"]
+            assert tasks[1]["recurrence"] == before_title_change["tasks"][1]["recurrence"]
+            assert tasks[1]["deadline"] == before_title_change["tasks"][1]["deadline"]
+            assert not rename_task(1, "   ") and tasks[1]["title"] == "Leer cada día"
             rename_task_list("Escuela", "Colegio")
             assert tasks[1]["list"] == "Colegio"
             delete_task_list("Colegio")
@@ -229,6 +236,15 @@ testsuite quest:
             assert len(tasks) == 1
         screenshot "tasks"
         click "Ver pasos"
+        click "Renombrar tarea"
+        assert screen "rename_task_screen"
+        click "Toca para escribir…"
+        type "Preparar mochila escolar"
+        click "Listo"
+        click "Guardar nombre"
+        assert not screen "rename_task_screen"
+        python:
+            assert tasks[0]["title"] == "Preparar mochila escolar"
         click "Toca para escribir…"
         type "Guardar libros"
         click "Cancelar"

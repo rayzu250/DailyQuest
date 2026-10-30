@@ -1,5 +1,5 @@
 init python:
-    QUEST_PAGES = ("main_todo", "add_task_screen", "task_detail_screen", "lists_screen",
+    QUEST_PAGES = ("main_todo", "add_task_screen", "task_detail_screen", "rename_task_screen", "lists_screen",
         "calendar_screen", "deadline_pick_screen", "theme_screen", "progress_screen", "move_task_screen",
         "quest_world_hub", "quest_expedition_scene", "quest_expedition_plan", "quest_convert_tasks")
 
@@ -48,6 +48,17 @@ init python:
         quest_navigate()
         if task["reminder"]:
             renpy.notify(quest_reminder_status())
+
+    def open_rename_task_form(index):
+        if 0 <= index < len(store.tasks):
+            store.task_title_draft = store.tasks[index]["title"]
+            renpy.show_screen("rename_task_screen", i=index)
+
+    def save_task_title_form(index):
+        if rename_task(index, store.task_title_draft):
+            store.task_title_draft = ""
+            renpy.hide_screen("rename_task_screen")
+        renpy.restart_interaction()
 
 screen quest_header(title):
     text title style "todo_title" size 54 xalign 0.5 ypos 50
