@@ -1,5 +1,7 @@
 # El documento persistente es el último estado confirmado; store es su copia de trabajo.
 default persistent.quest_document = None
+# Copia de un documento ilegible, conservada para su análisis.
+default persistent.quest_document_backup = None
 
 init -2 python:
     import uuid as _quest_uuid
@@ -30,6 +32,18 @@ init -2 python:
             task.setdefault("celebrated", task.get("done", False))
             task.setdefault("time", (task.get("recurrence") or {}).get("time", ""))
             task.setdefault("reminder", False)
+            expedition = task.get("expedition")
+            if isinstance(expedition, dict):
+                # Una partida migrada o editada no debe romper el detalle por un
+                # mundo o índice de tripulación inválido.
+                if expedition.get("world") not in QUEST_EXPEDITIONS:
+                    # Un mundo fuera del catálogo vuelve a un mundo de misión válido.
+                    expedition["world"] = "mecha"
+                    expedition["crew"] = 0
+                else:
+                    names = QUEST_EXPEDITIONS[expedition["world"]]["crew"]
+                    if not isinstance(expedition.get("crew"), int) or not 0 <= expedition["crew"] < len(names):
+                        expedition["crew"] = 0
             for step in task["subtasks"]:
                 step.setdefault("id", new_quest_id())
                 step.setdefault("deadline", None)
@@ -54,15 +68,45 @@ init -2 python:
         renpy.save_persistent()
         quest_sync_reminders()
 
-    def restore_quest_data():
-        document = store.persistent.quest_document
+    def quest_valid_document(document):
+        # Devuelve una copia limpia del documento, o None si no es legible.
         if not isinstance(document, _quest_builtins.dict) or document.get("version") not in (1, 2):
+            return None
+        tasks = document.get("tasks")
+        names = document.get("lists")
+        # En Ren'Py `list` es RevertableList: comparar con los builtins reales.
+        if not isinstance(tasks, _quest_builtins.list) or not isinstance(names, _quest_builtins.list):
+            return None
+        if not [name for name in names if isinstance(name, _quest_builtins.str)]:
+            return None
+        try:
+            # Copiar para que editar un borrador nunca modifique el documento guardado.
+            copied = _quest_json.loads(_quest_json.dumps(document, ensure_ascii=False))
+        except (TypeError, ValueError):
+            return None
+        # Descartar tareas ilegibles sin perder el resto de la colección.
+        copied["tasks"] = [task for task in copied["tasks"]
+            if isinstance(task, _quest_builtins.dict) and isinstance(task.get("title"), _quest_builtins.str)]
+        copied["lists"] = [name for name in copied["lists"] if isinstance(name, _quest_builtins.str)]
+        stage = copied.get("stage", "primaria")
+        copied["stage"] = stage if stage in QUEST_SCHOOL_PROFILES else "primaria"
+        return copied
+
+    def restore_quest_data():
+        raw = store.persistent.quest_document
+        document = quest_valid_document(raw)
+        if document is None:
+            if raw is not None:
+                # Conservar el documento dañado para poder revisarlo más tarde.
+                store.persistent.quest_document_backup = raw
+                renpy.log("DailyQuest: documento de tareas ilegible, se conservó la copia")
+                renpy.notify("No se pudo leer el archivo de tareas. Empezamos de nuevo.")
             return False
-        # Copiar para que editar un borrador nunca modifique el documento guardado.
-        document = _quest_json.loads(_quest_json.dumps(document))
         store.tasks = document["tasks"]
         store.task_lists = document["lists"]
         store.current_list = document.get("current_list", store.task_lists[0])
+        if store.current_list not in store.task_lists:
+            store.current_list = store.task_lists[0]
         store.player_name = document.get("player_name", "Amigo")
         store.completed_tasks = document.get("completed_tasks", 0)
         store.current_theme = document.get("theme", "bosque")
