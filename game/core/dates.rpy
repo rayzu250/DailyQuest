@@ -69,17 +69,10 @@ init python:
         ds = _task_deadlines(task)
         return min(ds) if ds else None
 
-    # Cuenta cuántas fechas límite (de subtareas o de tarea legada) caen en un día
+    # Cuenta las entradas visibles de un día: la misma lista que abre el
+    # calendario. Así el globo "·N" nunca contradice lo que se muestra.
     def count_deadlines_on(dkey):
-        n = 0
-        for t in store.tasks:
-            for s in t.get("subtasks", []):
-                if valid_date(s.get("deadline")) and tuple(s["deadline"]) == dkey:
-                    n += 1
-            steps = t.get("subtasks", [])
-            if not steps and valid_date(t.get("deadline")) and tuple(t["deadline"]) == dkey:
-                n += 1
-        return n
+        return len(calendar_entries(dkey))
 
     def calendar_entries(dkey):
         entries = []
