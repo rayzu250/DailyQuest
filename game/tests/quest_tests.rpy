@@ -196,7 +196,7 @@ testcase quest_restore:
     python:
         assert "runtime-saves" in config.savedir.replace("\\", "/")
         assert restore_quest_data()
-        assert tasks[0]["title"] == "Preparar mochila escolar"
+        assert tasks[0]["title"] == "Preparar mochila"
         assert tasks[0]["subtasks"][0]["text"] == "Guardar libros"
         assert "Escuela" in task_lists
         assert current_theme == "océano"
