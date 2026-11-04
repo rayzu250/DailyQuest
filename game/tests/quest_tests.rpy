@@ -120,6 +120,20 @@ testsuite quest:
             save_quest_data()
             assert quest_document() == saved_document
 
+    testcase calendar_open_task:
+        python:
+            add_new_task("Revisar el calendario")
+            set_deadline(0, today_tuple())
+            assert len(calendar_entries(today_tuple())) == 1
+        click "Menú"
+        click "Calendario"
+        assert screen "calendar_screen"
+        # Regresión: "Abrir" pasaba una transición que devolvía None y rompía
+        # la interacción al instanciarla.
+        click "Abrir"
+        assert screen "task_detail_screen"
+        screenshot "calendar-open"
+
     testcase text_and_navigation:
         click "Agregar tarea"
         assert screen "add_task_screen"

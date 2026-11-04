@@ -173,6 +173,6 @@ screen calendar_screen():
                             spacing 15
                             text "[dlabel2]" style "task_item" color c_status xmaximum 400
                             text "· [t.get('list', task_lists[0]).capitalize()]" style "task_item" size 30 color "#B9F6CA" xmaximum 180
-                            textbutton "Abrir" action Show("task_detail_screen", i=idx, transition=page_flip_or_none):
+                            textbutton "Abrir" action Show("task_detail_screen", i=idx):
                                 style "todo_button_small"
                                 text_style "todo_button_small_text"
