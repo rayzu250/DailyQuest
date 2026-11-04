@@ -57,7 +57,8 @@ screen task_reminder_screen(i):
                     textbutton "Permitir avisos" style "quest_option_button" action Function(quest_reminder_permission)
                     textbutton "Permitir horarios puntuales" style "quest_option_button" action Function(quest_exact_permission)
                     text "Puedes pedir ayuda a un adulto para estos permisos." style "quest_option_hint"
-    hbox:
-        xalign 0.5 ypos 1650 spacing 30
-        textbutton "Cancelar" style "quest_option_button" action Hide("task_reminder_screen")
-        textbutton "Guardar horario" style "quest_option_button" action Function(save_task_reminder, i, has_time, hour, minute, enabled and has_time)
+        # El pie vive dentro de la rama válida: sin tarea no hay horario que guardar.
+        hbox:
+            xalign 0.5 ypos 1650 spacing 30
+            textbutton "Cancelar" style "quest_option_button" action Hide("task_reminder_screen")
+            textbutton "Guardar horario" style "quest_option_button" action Function(save_task_reminder, i, has_time, hour, minute, enabled and has_time)
