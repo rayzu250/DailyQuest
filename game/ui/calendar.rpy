@@ -137,11 +137,11 @@ screen calendar_screen():
                         xsize 120
                         ysize 100
 
-    $ sel_title = "Tareas del %d de %s" % (sel[2], MONTHS_ES[sel[1] - 1])
+    $ sel_tasks = calendar_entries(sel)
+    # El total repetido aquí permite comparar de un vistazo con el globo del día.
+    $ sel_title = "Tareas del %d de %s · %d" % (sel[2], MONTHS_ES[sel[1] - 1], len(sel_tasks))
 
     text "[sel_title]" style "todo_text" size 36 xalign 0.5 ypos 1210
-
-    $ sel_tasks = calendar_entries(sel)
 
     if not sel_tasks:
         text "No hay tareas para este día." style "todo_text" xalign 0.5 ypos 1280
