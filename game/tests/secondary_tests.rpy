@@ -75,6 +75,8 @@ testsuite secondary:
             add_new_task("Proyecto de ciencias", recurrence={"freq": "diaria", "days": [], "time": ""})
             for title in ("Investigar", "Preparar", "Revisar"):
                 add_subtask(0, title)
+            # Cada paso nace con identidad propia, sin depender de la migración.
+            assert all(step.get("id") for step in tasks[0]["subtasks"])
             complete_task(0)
             assert not tasks[0]["done"]
             toggle_subtask(0, 0)
@@ -139,6 +141,26 @@ testsuite secondary:
                 assert persistent.quest_document is None
             finally:
                 store.main_menu = previous_menu
+
+    testcase legacy_conversion:
+        python:
+            store.world_progress = {}
+            add_new_task("Tarea de primaria")
+            add_subtask(0, "Paso heredado")
+            assert tasks[0].get("expedition") is None
+            quest_select_stage("secundaria")
+            # La pregunta aparece; sin conversión las tareas siguen usables.
+            assert renpy.get_screen("quest_convert_tasks")
+            assert quest_tasks_without_expedition() == [tasks[0]]
+            toggle_subtask(0, 0)
+            assert tasks[0]["subtasks"][0]["done"]
+            complete_task(0)
+            assert tasks[0]["done"]
+            # La conversión explícita respeta lo ya logrado.
+            quest_convert_all_tasks()
+            assert tasks[0]["expedition"]["state"] == "finished"
+            assert not quest_tasks_without_expedition()
+            renpy.hide_screen("quest_convert_tasks")
 
     testcase mecha_flow:
         click "Menú"

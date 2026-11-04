@@ -5,6 +5,8 @@ testcase ocean_theme:
         assert "runtime-saves" in config.savedir.replace("\\", "/")
     run Jump("main_menu_todo")
     python:
+        # Baseline explícito: el selector de mundos ilustrados exige primaria.
+        quest_setting("school_stage", "primaria")
         store.tasks = []
         store.task_lists = ["General"]
         store.current_list = "General"
@@ -28,6 +30,9 @@ testcase ocean_theme:
     click "Ayuda"
     pause 1.3
     screenshot "ocean-guide"
+    # La guía es modal: sin cerrarla, el botón Menú del header no responde.
+    click "Volver al juego"
+    assert not screen "quest_help"
     click "Menú"
     screenshot "ocean-menu"
     click "Opciones"

@@ -4,6 +4,9 @@ testsuite quest:
         python:
             assert "runtime-saves" in config.savedir.replace("\\", "/"), "Usa --savedir tests/runtime-saves"
         run Jump("main_menu_todo")
+        # El `call screen` necesita una interacción para colocar la pantalla;
+        # los asserts de pantalla pueden fallar si se comprueban en el mismo fotograma.
+        pause 1.0
         assert screen "view_tasks_screen"
         python:
             store.tasks = []
@@ -16,6 +19,13 @@ testsuite quest:
             store.renaming_list = None
             store.task_filter = "all"
             persistent.quest_document = None
+            # Aislamiento hermético: etapas y mundos personalizados del jugador
+            # real nunca deben influir en la suite.
+            persistent.school_stage = "primaria"
+            persistent.quest_document_backup = None
+            store.world_progress = {}
+            store.stage_themes = {}
+            store.current_theme = "bosque"
 
     testcase data_integrity:
         python:
@@ -28,29 +38,87 @@ testsuite quest:
             add_new_task("Leer", recurrence={"freq": "diaria", "days": [], "time": ""})
             add_subtask(0, "Una página")
             complete_task(0)
-            assert len(tasks) == 2
+            assert len(tasks) == 2, ("copia recurrente", len(tasks), [t["title"] for t in tasks])
             complete_task(0)
             complete_task(0)
-            assert len(tasks) == 2 and completed_tasks == 1
-            assert tasks[0]["next_task_id"] == tasks[1]["id"]
-            assert len(calendar_entries(tasks[1]["deadline"])) == 1
+            assert len(tasks) == 2 and completed_tasks == 1, ("recompletar", len(tasks), completed_tasks)
+            assert tasks[0]["next_task_id"] == tasks[1]["id"], ("next_id", tasks[0].get("next_task_id"), tasks[1].get("id"))
+            assert len(calendar_entries(tasks[1]["deadline"])) == 1, ("calendario", tasks[1].get("deadline"))
+            # El globo del calendario es la misma lista que el día abre.
+            assert count_deadlines_on(tuple(tasks[1]["deadline"])) == 1
+            assert count_deadlines_on(tuple(tasks[1]["deadline"])) == len(calendar_entries(tuple(tasks[1]["deadline"])))
             add_task_list("Escuela")
             move_task(1, "Escuela")
             rename_task_list("Escuela", "Colegio")
             assert tasks[1]["list"] == "Colegio"
             delete_task_list("Colegio")
             assert tasks[1]["list"] == "General"
-            before = quest_document()
             migrate_quest_data()
+            migrate_quest_data()
+            before = quest_document()
             migrate_quest_data()
             assert quest_document() == before, (quest_document(), before)
             save_quest_data()
             store.tasks = []
-            assert restore_quest_data()
-            assert quest_document() == before, (quest_document(), before)
+            _r = restore_quest_data()
+            assert _r, "restore falló"
+            assert quest_document() == before, ("post-restore", quest_document(), before)
             store.tasks = [{"title": "Antigua", "done": False, "priority": 1}]
             migrate_quest_data()
             assert tasks[0]["id"] and tasks[0]["subtasks"] == []
+
+    testcase document_safety:
+        python:
+            saved_document = quest_document()
+            store.tasks = []
+            # Un documento ilegible nunca rompe el arranque ni lanza excepción.
+            for broken in ({}, {"version": 3},
+                           {"version": 1, "tasks": {}},
+                           {"version": 2, "tasks": "x", "lists": []},
+                           {"version": 2, "tasks": [], "lists": []}):
+                persistent.quest_document = broken
+                assert not restore_quest_data()
+                assert persistent.quest_document_backup == broken
+            # Tareas ilegibles se descartan sin perder el resto.
+            persistent.quest_document = {"version": 2,
+                "tasks": [1, {"title": "Renombrada"}], "lists": [7, "General"],
+                "stage": "inventado"}
+            assert restore_quest_data()
+            assert [task["title"] for task in tasks] == ["Renombrada"]
+            assert task_lists == ["General"] and persistent.school_stage == "primaria"
+            # El último documento ilegible sigue disponible en la copia.
+            assert persistent.quest_document_backup == {"version": 2, "tasks": [], "lists": []}
+            # Vuelta al estado correcto de la suite.
+            persistent.quest_document = saved_document
+            assert restore_quest_data()
+            persistent.quest_document_backup = None
+        run Hide("notify")
+
+    testcase calendar_single_source:
+        python:
+            # Estas tareas de calibración no deben sobrescribir el documento
+            # que quest_restore espera encontrar de un run anterior.
+            # Normalizar antes del snapshot: save_quest_data() vuelve a
+            # normalizar y añadiría stage_themes, rompiendo la comparación.
+            migrate_quest_data()
+            saved_document = quest_document()
+            store.tasks = []
+            add_new_task("Pagar la luz")
+            add_subtask(0, "Revisar la factura")
+            set_subtask_deadline(0, 0, (2031, 3, 15))
+            day = (2031, 3, 15)
+            assert count_deadlines_on(day) == len(calendar_entries(day)) == 1
+            toggle_subtask(0, 0)
+            # Los pasos completados no inflan el contador del día.
+            assert count_deadlines_on(day) == len(calendar_entries(day)) == 0
+            assert len(tasks) == 1
+            persistent.quest_document = saved_document
+            assert restore_quest_data()
+            # Deja el documento coherente tras la calibración; el testcase
+            # text_and_navigation es ahora el último y produce el estado
+            # que quest_restore hereda en su propio proceso.
+            save_quest_data()
+            assert quest_document() == saved_document
 
     testcase text_and_navigation:
         click "Agregar tarea"
@@ -114,7 +182,7 @@ testcase quest_restore:
     python:
         assert "runtime-saves" in config.savedir.replace("\\", "/")
         assert restore_quest_data()
-        assert tasks[0]["title"] == "Preparar mochila"
+        assert tasks[0]["title"] == "Preparar mochila escolar"
         assert tasks[0]["subtasks"][0]["text"] == "Guardar libros"
         assert "Escuela" in task_lists
         assert current_theme == "océano"

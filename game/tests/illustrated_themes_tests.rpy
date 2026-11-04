@@ -2,6 +2,9 @@
 testsuite illustrated_themes:
     before testcase:
         python:
+            # Baseline explícito: otra suite pudo dejar un perfil secundario,
+            # cuyo selector de mundos no ofrece Bosque, Atardecer ni Noche.
+            quest_setting("school_stage", "primaria")
             # La primera carga de texturas puede superar el límite de 5 segundos.
             _test.timeout = 20.0
 
@@ -36,7 +39,11 @@ testsuite illustrated_themes:
         pause 0.3
         screenshot "forest-tasks"
         click "Ayuda"
+        assert screen "quest_help"
         screenshot "forest-guide"
+        # La guía es modal: sin cerrarla, el botón Menú del header no responde.
+        click "Volver al juego"
+        assert not screen "quest_help"
         click "Menú"
         screenshot "forest-menu"
         click "Calendario"
@@ -91,7 +98,10 @@ testsuite illustrated_themes:
         pause 0.3
         screenshot "sunset-tasks"
         click "Ayuda"
+        assert screen "quest_help"
         screenshot "sunset-guide"
+        click "Volver al juego"
+        assert not screen "quest_help"
         click "Menú"
         screenshot "sunset-menu"
         click "Calendario"
@@ -146,7 +156,10 @@ testsuite illustrated_themes:
         pause 0.3
         screenshot "night-tasks"
         click "Ayuda"
+        assert screen "quest_help"
         screenshot "night-guide"
+        click "Volver al juego"
+        assert not screen "quest_help"
         click "Menú"
         screenshot "night-menu"
         click "Calendario"

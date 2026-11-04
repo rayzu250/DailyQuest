@@ -3,6 +3,9 @@ testsuite expanded_worlds:
     before testcase:
         python:
             assert "runtime-saves" in config.savedir.replace("\\", "/")
+            # Baseline explícito: otra suite pudo dejar un perfil secundario,
+            # donde los pasos exigen una misión activa y no se otorgan frutas.
+            quest_setting("school_stage", "primaria")
             _test.timeout = 25.0
 
     after testsuite:
