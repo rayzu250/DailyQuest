@@ -31,7 +31,7 @@ screen quest_options_content(back_action):
                 textbutton (profile["label"] + " · " + profile["ages"]):
                     style "quest_option_button"
                     selected persistent.school_stage == stage
-                    action Function(quest_setting, "school_stage", stage)
+                    action Function(quest_select_stage, stage)
             text ("Proyectos, expediciones y decisiones a tu ritmo." if quest_secondary() else "Tareas y pasos pequeños para organizar tu día.") style "quest_option_hint"
             text "Tamaño de letra" style "quest_option_heading"
             hbox:

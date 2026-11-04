@@ -74,6 +74,14 @@ init -2 python:
         renpy.hide_screen("quest_options")
         renpy.restart_interaction()
 
+    def quest_select_stage(stage):
+        # Cambio de perfil desde la pantalla de opciones.
+        quest_setting("school_stage", stage)
+        # Tareas de otro perfil: preguntar aquí, donde el jugador acaba de
+        # decidirlo. El aviso usa un zorder mayor que esta pantalla modal.
+        if quest_secondary() and quest_tasks_without_expedition():
+            renpy.show_screen("quest_convert_tasks")
+
     def quest_prepare_menu():
         if persistent.quest_document:
             restore_quest_data()

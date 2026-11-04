@@ -1,7 +1,7 @@
 init python:
     QUEST_PAGES = ("main_todo", "add_task_screen", "task_detail_screen", "lists_screen",
         "calendar_screen", "deadline_pick_screen", "theme_screen", "progress_screen", "move_task_screen",
-        "quest_world_hub", "quest_expedition_scene", "quest_expedition_plan")
+        "quest_world_hub", "quest_expedition_scene", "quest_expedition_plan", "quest_convert_tasks")
 
     def quest_navigate(page="view_tasks_screen"):
         renpy.run(DisableAllInputValues())

@@ -22,7 +22,7 @@ screen quest_expedition_controls(index, task):
                     add quest_expedition_image(task) xysize (100, 130) fit "contain"
                     vbox:
                         spacing 12
-                        text QUEST_EXPEDITIONS[world]["crew"][expedition["crew"]] size 34 color "#FFFFFF"
+                        text quest_crew_name(expedition) size 34 color "#FFFFFF"
                         if expedition.get("goal"):
                             text expedition["goal"] size 30 color "#FFFFFF" xmaximum 700 substitute False
                 if expedition["state"] == "planned" and not task["done"]:
@@ -43,6 +43,25 @@ screen quest_expedition_controls(index, task):
                 else:
                     textbutton "Pausar misión" style "todo_button_small" text_size 30 action Function(quest_pause_expedition, index)
             textbutton "Plan y reflexión" style "todo_button_small" text_size 30 action Function(quest_open_plan, index)
+
+screen quest_convert_tasks():
+    modal True
+    zorder 185
+    key "game_menu" action Hide("quest_convert_tasks")
+    add Solid("#000000AA")
+    frame:
+        xalign 0.5 yalign 0.4 xsize 900
+        padding (32, 32)
+        background get_theme_panel()
+        vbox:
+            spacing 24
+            text "Convertir en proyectos" style "todo_text" size 42
+            text "Tus tareas pueden convertirse en proyectos con misión, pasos y recursos. También puedes dejarlas como tareas sencillas." style "todo_text" size 30
+            $ pending = quest_tasks_without_expedition()
+            if pending:
+                text "Se convertirán %d tareas." % len(pending) style "todo_text" size 32 color "#FFD54F"
+            textbutton "Convertir en proyectos" style "todo_button" text_style "todo_button_text" xalign 0.5 sensitive bool(pending) action [Function(quest_convert_all_tasks), Hide("quest_convert_tasks")]
+            textbutton "Ahora no" style "todo_button_small" text_style "todo_button_small_text" action Hide("quest_convert_tasks")
 
 screen quest_expedition_scene(task_id, returning=False):
     modal True
@@ -149,6 +168,8 @@ screen quest_world_hub():
                             null width 460 height 470
                 hbox:
                     xalign 0.5 ypos 1530 spacing 24
+                    if quest_tasks_without_expedition():
+                        textbutton "Convertir tareas" style "todo_button_small" yminimum 66 action Show("quest_convert_tasks")
                     textbutton "Anterior" style "todo_button_small" text_size 28 sensitive visible_page > 0 action SetScreenVariable("page", visible_page - 1)
                     text ("%d / %d" % (visible_page + 1, max_page + 1)) size 30 color "#FFFFFF" yalign 0.5
                     textbutton "Siguiente" style "todo_button_small" text_size 28 sensitive visible_page < max_page action SetScreenVariable("page", visible_page + 1)
