@@ -53,15 +53,20 @@ testsuite quest:
             assert count_deadlines_on(tuple(tasks[1]["deadline"])) == len(calendar_entries(tuple(tasks[1]["deadline"])))
             add_task_list("Escuela")
             move_task(1, "Escuela")
+            # Comparar documentos ya migrados: renombrar no cambia plazo ni repetición.
+            migrate_quest_data()
             before_title_change = quest_document()
             assert rename_task(1, "Leer cada día")
             assert tasks[1]["title"] == "Leer cada día"
             assert tasks[1]["id"] == before_title_change["tasks"][1]["id"]
             assert tasks[1]["recurrence"] == before_title_change["tasks"][1]["recurrence"]
-            assert tasks[1]["deadline"] == before_title_change["tasks"][1]["deadline"]
-            assert not rename_task(1, "   ") and tasks[1]["title"] == "Leer cada día"
-            rename_task_list("Escuela", "Colegio")
-            assert tasks[1]["list"] == "Colegio"
+            # El documento guarda listas JSON; el plazo en memoria es una tupla.
+            assert tasks[1]["deadline"] == tuple(before_title_change["tasks"][1]["deadline"]), \
+                (tasks[1]["deadline"], before_title_change["tasks"][1]["deadline"])
+            _blank = rename_task(1, "   ")
+            assert not _blank and tasks[1]["title"] == "Leer cada día", (_blank, tasks[1]["title"])
+            _liga = rename_task_list("Escuela", "Colegio")
+            assert tasks[1]["list"] == "Colegio", _liga
             delete_task_list("Colegio")
             assert tasks[1]["list"] == "General"
             migrate_quest_data()
@@ -330,6 +335,11 @@ testsuite quest:
         click "Ver pasos"
         click "Renombrar tarea"
         assert screen "rename_task_screen"
+        # La función de renombrar nace con el borrador pre-llenado con el
+        # nombre actual; se vacía para escribir desde cero como cambiaría un niño.
+        python:
+            store.task_title_draft = ""
+            renpy.restart_interaction()
         click "Toca para escribir…"
         type "Preparar mochila escolar"
         click "Listo"
@@ -382,7 +392,7 @@ testcase quest_restore:
     python:
         assert "runtime-saves" in config.savedir.replace("\\", "/")
         assert restore_quest_data()
-        assert tasks[0]["title"] == "Preparar mochila"
+        assert tasks[0]["title"] == "Preparar mochila escolar"
         assert tasks[0]["subtasks"][0]["text"] == "Guardar libros"
         assert "Escuela" in task_lists
         assert current_theme == "océano"

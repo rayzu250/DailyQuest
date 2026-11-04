@@ -22,25 +22,32 @@ testsuite rename_task:
         run Show("task_detail_screen", i=0)
         click "Renombrar tarea"
         assert screen "rename_task_screen"
+        # El borrador nace con el nombre actual; se vacía para escribir desde cero.
+        python:
+            assert store.task_title_draft == "Preparar exposición"
+            store.task_title_draft = ""
+            renpy.restart_interaction()
         click "Toca para escribir…"
-        type "Exposición de ciencias"
+        type "Exposicion de ciencias"
         click "Listo"
         click "Guardar nombre"
         python:
-            assert not renpy.get_screen("rename_task_screen")
+            assert not renpy.get_screen("rename_task_screen"), "rename screen"
             renamed = tasks[0]
-            assert renamed["title"] == "Exposición de ciencias"
-            assert renamed["id"] == original_id
-            assert renamed["deadline"] == (2026, 11, 4)
-            assert renamed["recurrence"] == original_recurrence
-            assert renamed["time"] == "17:30" and renamed["reminder"]
-            assert renamed["subtasks"][0]["id"] == original_step_id
+            assert renamed["title"] == "Exposicion de ciencias", ("title", renamed["title"])
+            assert renamed["id"] == original_id, ("id", renamed["id"], original_id)
+            assert renamed["deadline"] == (2026, 11, 4), ("deadline", renamed["deadline"])
+            assert renamed["recurrence"] == original_recurrence, ("rec", renamed["recurrence"], original_recurrence)
+            assert renamed["time"] == "17:30" and renamed["reminder"], ("time", renamed["time"], renamed["reminder"])
+            assert renamed["subtasks"][0]["id"] == original_step_id, ("step", renamed["subtasks"][0]["id"], original_step_id)
             saved = quest_document()
             store.tasks = []
-            assert restore_quest_data() and quest_document() == saved
+            _r = restore_quest_data()
+            assert _r and quest_document() == saved, ("restore", _r)
             task_title_draft = "   "
-            assert not rename_task(0, task_title_draft)
-            assert tasks[0]["title"] == "Exposición de ciencias"
+            _b = rename_task(0, task_title_draft)
+            assert not _b, ("blank rename", _b)
+            assert tasks[0]["title"] == "Exposicion de ciencias", ("after blank", tasks[0]["title"])
             _test.timeout = 5.0
 
     testcase rename_subtask_preserves_step:
