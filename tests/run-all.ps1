@@ -38,13 +38,11 @@ $chain = @(
     @{ t = 'quest_restore'; s = 40 },
     @{ t = 'secondary'; s = 80 },
     @{ t = 'base_rooms'; s = 60 },
-    @{ t = 'comandante'; s = 60 },
     @{ t = 'expanded_worlds'; s = 70 },
     @{ t = 'help_notifications'; s = 60 },
     @{ t = 'illustrated_themes'; s = 70 },
     @{ t = 'options_guide'; s = 70 },
-    @{ t = 'reminders'; s = 70 },
-    @{ t = 'rename_task'; s = 60 }
+    @{ t = 'reminders'; s = 70 }
 )
 foreach ($item in $chain) {
     Invoke-Suite $item.t $item.s
