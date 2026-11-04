@@ -89,7 +89,10 @@ init python:
                     if nxt is not None:
                         child_id = new_quest_id()
                         t["next_task_id"] = child_id
-                        subs = [{"text": s.get("text", ""), "done": False, "deadline": None, "fruit": None} for s in t.get("subtasks", [])]
+                        # Los pasos copiados nacen con identidad propia para que
+                        # sus recursos y recompensas no compartan serie con el padre.
+                        subs = [{"id": new_quest_id(), "text": s.get("text", ""), "done": False,
+                            "deadline": None, "fruit": None} for s in t.get("subtasks", [])]
                         store.tasks.append({
                             "id": child_id,
                             "next_task_id": None,
@@ -140,7 +143,7 @@ init python:
             if store.tasks[task_index].get("done") and quest_task_expedition(store.tasks[task_index]):
                 renpy.notify("Reabre la misión para agregar pasos.")
                 return
-            store.tasks[task_index].setdefault("subtasks", []).append({"text": text, "done": False, "deadline": None, "fruit": None})
+            store.tasks[task_index].setdefault("subtasks", []).append({"id": new_quest_id(), "text": text, "done": False, "deadline": None, "fruit": None})
             guide_event("Dividir una tarea en pasos puede ayudarte a empezar.")
 
     def toggle_subtask(task_index, subtask_index):

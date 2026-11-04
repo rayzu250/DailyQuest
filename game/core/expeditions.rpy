@@ -29,6 +29,18 @@ init -2 python:
     }
     QUEST_CREW_TINTS = ("#FFFFFF", "#B8DDD5", "#DCC8F0")
 
+    def quest_crew_index(expedition, pool):
+        # Un índice de una partida migrada o editada no debe romper las pantallas.
+        crew = expedition.get("crew", 0)
+        if not isinstance(crew, int) or not 0 <= crew < len(pool):
+            crew = 0
+        return crew
+
+    def quest_crew_name(expedition):
+        world = expedition["world"]
+        names = QUEST_EXPEDITIONS[world]["crew"]
+        return names[quest_crew_index(expedition, names)]
+
     def quest_new_expedition(world=None):
         world = world or quest_theme_key()
         if world not in QUEST_EXPEDITIONS:
@@ -100,11 +112,36 @@ init -2 python:
             expedition["crew"] = crew
         save_quest_data()
 
+    def quest_tasks_without_expedition():
+        # Tareas creadas en otro perfil: convertibles en proyectos.
+        return [task for task in tasks if not quest_task_expedition(task)]
+
+    def quest_convert_all_tasks():
+        if not quest_secondary():
+            return 0
+        converted = 0
+        for task in quest_tasks_without_expedition():
+            expedition = quest_new_expedition()
+            if task.get("done"):
+                # Lo ya logrado no se pierde ni reaparece como pendiente.
+                expedition["state"] = "finished"
+                expedition["finished_at"] = list(today_tuple())
+            task["expedition"] = expedition
+            converted += 1
+        if converted:
+            save_quest_data()
+            guide_event("Convertí tus tareas en proyectos con misión y recursos.")
+            renpy.notify("Proyectos listos")
+        return converted
+
     def quest_allow_completion(task):
         if not quest_secondary() or task.get("done"):
             return True
         expedition = quest_task_expedition(task)
-        if not expedition or expedition["state"] != "active":
+        if not expedition:
+            # Tarea heredada de otro perfil: se completa como tarea normal.
+            return True
+        if expedition["state"] != "active":
             renpy.notify("Inicia o continúa la misión antes de finalizarla.")
             return False
         if not quest_expedition_ready(task):
@@ -116,11 +153,12 @@ init -2 python:
         if task.get("done") and quest_task_expedition(task):
             renpy.notify("Reabre la misión para modificar sus pasos.")
             return False
-        if quest_secondary():
-            expedition = quest_task_expedition(task)
-            if not expedition or expedition["state"] != "active":
-                renpy.notify("Inicia o continúa la misión para completar sus pasos.")
-                return False
+        if not quest_secondary():
+            return True
+        expedition = quest_task_expedition(task)
+        if expedition and expedition["state"] != "active":
+            renpy.notify("Inicia o continúa la misión para completar sus pasos.")
+            return False
         return True
 
     def quest_record_resource(task, step):
@@ -131,8 +169,10 @@ init -2 python:
         step["reward_world"] = world
         progress = store.world_progress.setdefault(world, {"earned": [], "upgrades": []})
         # Un identificador por paso; reabrir, cargar o tocar dos veces no duplica recursos.
-        if step["id"] not in progress["earned"]:
-            progress["earned"].append(step["id"])
+        # Si un paso heredado no tiene identidad propia, nace aquí una sola vez.
+        step_id = step.setdefault("id", new_quest_id())
+        if step_id not in progress["earned"]:
+            progress["earned"].append(step_id)
 
     def quest_update_expedition_completion(task):
         expedition = quest_task_expedition(task)
