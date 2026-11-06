@@ -1,0 +1,27 @@
+#!/bin/sh
+# Candado de publicación: solo la rama General sale de este equipo.
+# Rayzu y cualquier otra rama se quedan en local. Se dispara también
+# con "git push --all", que aborta por completo.
+#
+# Instalar en un clone nuevo:
+#   PowerShell:  Copy-Item tools\pre-push .git\hooks\pre-push
+#   Bash:        cp tools/pre-push .git/hooks/pre-push
+
+blocked=""
+
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" != "refs/heads/General" ]; then
+        blocked="$blocked $remote_ref"
+    fi
+done
+
+if [ -n "$blocked" ]; then
+    echo ""
+    echo "  PUSH BLOQUEADO:$blocked"
+    echo "  Solo se permite publicar refs/heads/General."
+    echo "  Rayzu es una rama personal y no debe subirse."
+    echo ""
+    exit 1
+fi
+
+exit 0

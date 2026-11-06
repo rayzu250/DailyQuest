@@ -10,6 +10,19 @@ earns a random fruit with popup animation, guide celebration and sound.
 - Ren'Py 8.5.3 SDK, bundled locally at `renpy-8.5.3-sdk/` (untracked in git).
 - Windows + VS Code (workspace tasks configured).
 
+## Branches and publication
+
+Repository: <https://github.com/rayzu250/DailyQuest> — exactly one public branch.
+
+- `General` is the published branch. Anything that must reach the public
+  download is committed here and pushed with `git push origin General`.
+- `Rayzu` is a personal branch that only lives on the local machine:
+  no remote, and never pushed by hand.
+- A `pre-push` hook only allows `refs/heads/General`, so a stray
+  `git push --all` aborts instead of leaking private work. Install it on a
+  new clone with `Copy-Item tools\pre-push .git\hooks\pre-push`
+  (PowerShell) or `cp tools/pre-push .git/hooks/pre-push` (sh).
+
 ## Commands
 
 - Run the game: `Ctrl+Shift+B` (task `Ren'Py: Run`), or F5 with `game/` open.
