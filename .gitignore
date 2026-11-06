@@ -34,8 +34,7 @@
 /tests/java-build/
 /dist/
 /tools/.audio-deps/
-/tests/android-build.log
-/tests/android-gradle.log
+/tests/*.log
 
 # Configuración y claves locales de firma Android.
 /android.json
@@ -46,3 +45,6 @@
 /Correcciones/
 /DailyQuest_presentacion_YouTube.mp4
 /DailyQuest_presentacion_YouTube.pptx
+
+# Descarga progresiva que Ren'Py regenera por sí solo.
+/game/progressive_download.txt
