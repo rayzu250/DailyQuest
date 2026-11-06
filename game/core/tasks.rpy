@@ -127,6 +127,66 @@ init python:
                 guide_event("Puedes revisar los pasos que faltan.")
             quest_update_expedition_completion(t)
 
+    # --- Eliminar tareas ---
+
+    def delete_task(index):
+        # Borrar es seguro: la pantalla pide confirmación antes de llegar aquí.
+        # Los logros ya ganados no se quitan cuando la tarea desaparece.
+        if not 0 <= index < len(store.tasks):
+            renpy.notify("Esa tarea ya no está en la lista.")
+            return False
+        store.tasks.pop(index)
+        renpy.notify("Tarea eliminada")
+        guide_event("Borrar lo que ya no necesitas también es organizar.")
+        return True
+
+    def _quest_task_by_id(task_id):
+        # Las copias de una serie se reconocen por id, no por posición.
+        for task in store.tasks:
+            if task.get("id") == task_id:
+                return task
+        return None
+
+    def quest_series_members(task):
+        # Toda la familia de copias a la que pertenece `task`: la copia
+        # original y cada una de las recurrencias generadas.
+        inside = any(member is task for member in store.tasks)
+        if not task.get("recurrence") or not inside:
+            return [task] if inside else []
+        # Subir por los enlaces hasta la copia original de la serie.
+        root = task
+        for _ in range(len(store.tasks) + 1):
+            parent = None
+            for member in store.tasks:
+                if member is not root and member.get("next_task_id") == root.get("id"):
+                    parent = member
+                    break
+            if parent is None:
+                break
+            root = parent
+        # Bajar por la cadena completa, copia por copia, sin bucles.
+        members = []
+        current = root
+        while current is not None:
+            if any(current is member for member in members):
+                break
+            members.append(current)
+            current = _quest_task_by_id(current.get("next_task_id"))
+        return members
+
+    def close_recurrence_series(index):
+        # Deja la copia actual fuera de la lista y también las demás
+        # de su cadena: la recurrencia no genera otra nunca más.
+        if not 0 <= index < len(store.tasks):
+            renpy.notify("Esa tarea ya no está en la lista.")
+            return False
+        members = quest_series_members(store.tasks[index])
+        gone = set(member.get("id") for member in members)
+        store.tasks = [task for task in store.tasks if task.get("id") not in gone]
+        renpy.notify("Serie cerrada: %d tareas eliminadas" % len(members))
+        guide_event("Las tareas repetidas también pueden terminar.")
+        return True
+
     # --- Subtareas ---
 
     # Devuelve (completadas, total) o None si la tarea no tiene subtareas

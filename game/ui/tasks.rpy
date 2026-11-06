@@ -98,6 +98,7 @@ screen task_detail_screen(i):
                     spacing 16
                     textbutton "Fecha" style "todo_button_small" text_style "todo_button_small_text" action Show("deadline_pick_screen", i=i)
                     textbutton "Mover a lista" style "todo_button_small" text_style "todo_button_small_text" action Show("move_task_screen", i=i)
+                    textbutton "Eliminar tarea" style "todo_button_small" text_style "todo_button_small_text" action Confirm("¿Borrar esta tarea para siempre?", [Function(delete_task, i), Hide("task_detail_screen")])
                 if valid_date(task.get("deadline")):
                     text date_tuple_to_string(task["deadline"]) style "todo_text" size 32
                 textbutton "Hora y recordatorio" style "todo_button_small" text_style "todo_button_small_text" action Show("task_reminder_screen", i=i)
@@ -132,6 +133,10 @@ screen task_detail_screen(i):
                 if task.get("recurrence"):
                     text recurrence_description(task) style "todo_text" size 32
                     textbutton "Quitar repetición" style "todo_button_small" text_style "todo_button_small_text" action Confirm("¿Dejar de repetir esta tarea?", Function(clear_recurrence, i))
+                    $ _series_size = len(quest_series_members(task))
+                    $ _series_text = ("¿Cerrar la serie? Solo se borrará esta tarea." if _series_size == 1
+                        else "¿Cerrar la serie? Se borrarán las %d copias de la serie." % _series_size)
+                    textbutton "Cerrar serie" style "todo_button_small" text_style "todo_button_small_text" action Confirm(_series_text, [Function(close_recurrence_series, i), Hide("task_detail_screen")])
         textbutton ("Reabrir tarea" if task["done"] else ("Finalizar misión" if quest_secondary() else "Completar tarea")) style "todo_button" text_style "todo_button_text" xalign 0.5 yalign 0.94 action Function(complete_task, i)
         use quest_guide
 

@@ -134,6 +134,60 @@ testsuite quest:
         assert screen "task_detail_screen"
         screenshot "calendar-open"
 
+    testcase delete_task:
+        # El testcase anterior deja abiertos el calendario y el detalle:
+        # ocultarlos antes de reordenar la lista evita clics perdidos.
+        run Hide("task_detail_screen")
+        run Hide("calendar_screen")
+        pause 0.5
+        python:
+            store.tasks = []
+            store.completed_tasks = 0
+            add_new_task("Regar jardín")
+            add_new_task("Contar estrellas")
+            assert len(tasks) == 2
+        click "Contar estrellas"
+        assert screen "task_detail_screen"
+        click "Eliminar tarea"
+        assert screen "confirm"
+        click "Sí"
+        assert not screen "task_detail_screen"
+        python:
+            assert [t["title"] for t in tasks] == ["Regar jardín"]
+            # Un índice que ya no existe se ignora sin romper nada.
+            assert not delete_task(7) and len(tasks) == 1
+            # Los logros de vida no se quitan al borrar una tarea completada.
+            complete_task(0)
+            assert completed_tasks == 1
+            assert delete_task(0) and not tasks
+            assert completed_tasks == 1, ("logros vitales", completed_tasks)
+
+    testcase close_series:
+        run Hide("task_detail_screen")
+        pause 0.5
+        python:
+            store.tasks = []
+            store.completed_tasks = 0
+            add_new_task("Meditar", recurrence={"freq": "diaria", "days": [], "time": ""})
+            complete_task(0)
+            assert len(tasks) == 2, ("copia del día siguiente", len(tasks))
+            complete_task(1)
+            assert len(tasks) == 3, ("la copia también genera la suya", len(tasks))
+            assert tasks[0]["next_task_id"] == tasks[1]["id"]
+            assert tasks[1]["next_task_id"] == tasks[2]["id"]
+            # La familia completa se alcanza desde cualquier copia.
+            assert [t["id"] for t in quest_series_members(tasks[2])] == [t["id"] for t in tasks]
+            assert len(quest_series_members(tasks[1])) == 3
+        click "Meditar"
+        assert screen "task_detail_screen"
+        click "Cerrar serie"
+        assert screen "confirm"
+        click "Sí"
+        assert not screen "task_detail_screen"
+        python:
+            assert not tasks, "la cadena completa desapareció"
+            assert completed_tasks == 2, ("logros de la serie", completed_tasks)
+
     testcase text_and_navigation:
         click "Agregar tarea"
         assert screen "add_task_screen"
