@@ -22,20 +22,20 @@ screen view_tasks_screen():
         timer 2.0 repeat True action Function(quest_poll_reminders)
     on "show" action Function(guide_greet)
     add get_theme_bg()
-    text "Mis tareas" style "todo_title" xalign 0.5 ypos 45
-    textbutton "Menú" style "todo_button_small" text_style "todo_button_small_text" xpos 35 ypos 145 action Show("navigation_drawer")
-    textbutton "Mis logros" style "todo_button_small" text_style "todo_button_small_text" xalign 1.0 xoffset -35 ypos 145 action Function(quest_navigate, "progress_screen")
-    textbutton "Lista: [current_list] ▾" style "todo_button" text_size 34 xalign 0.5 ypos 265 action Function(quest_navigate, "lists_screen")
+    text _("Mis tareas") style "todo_title" xalign 0.5 ypos 45
+    textbutton _("Menú") style "todo_button_small" text_style "todo_button_small_text" xpos 35 ypos 145 action Show("navigation_drawer")
+    textbutton _("Mis logros") style "todo_button_small" text_style "todo_button_small_text" xalign 1.0 xoffset -35 ypos 145 action Function(quest_navigate, "progress_screen")
+    textbutton _("Lista: [current_list] ▾") style "todo_button" text_size 34 xalign 0.5 ypos 265 action Function(quest_navigate, "lists_screen")
     hbox:
         xalign 0.5 ypos 390 spacing 16
-        for value, caption in [("all", "Todas"), ("today", "Hoy"), ("undated", "Sin fecha")]:
+        for value, caption in [("all", _("Todas")), ("today", _("Hoy")), ("undated", _("Sin fecha"))]:
             textbutton caption:
                 style "todo_button_small"
                 text_style "todo_button_small_text"
                 selected task_filter == value
                 action SetVariable("task_filter", value)
         if quest_secondary():
-            textbutton "7 días" style "todo_button_small" text_style "todo_button_small_text" selected task_filter == "week" action SetVariable("task_filter", "week")
+            textbutton _("7 días") style "todo_button_small" text_style "todo_button_small_text" selected task_filter == "week" action SetVariable("task_filter", "week")
     $ shown = visible_task_indices()
     viewport:
         xpos 50 ypos 505 xsize 980 ysize (940 if persistent.quest_guide_enabled else 1060)
@@ -98,7 +98,7 @@ screen task_detail_screen(i):
                     spacing 16
                     textbutton "Fecha" style "todo_button_small" text_style "todo_button_small_text" action Show("deadline_pick_screen", i=i)
                     textbutton "Mover a lista" style "todo_button_small" text_style "todo_button_small_text" action Show("move_task_screen", i=i)
-                    textbutton "Eliminar tarea" style "todo_button_small" text_style "todo_button_small_text" action Confirm("¿Borrar esta tarea para siempre?", [Function(delete_task, i), Hide("task_detail_screen")])
+                    textbutton _("Eliminar tarea") style "todo_button_small" text_style "todo_button_small_text" action Confirm(_("¿Borrar esta tarea para siempre?"), [Function(delete_task, i), Hide("task_detail_screen")])
                 if valid_date(task.get("deadline")):
                     text date_tuple_to_string(task["deadline"]) style "todo_text" size 32
                 textbutton "Hora y recordatorio" style "todo_button_small" text_style "todo_button_small_text" action Show("task_reminder_screen", i=i)
@@ -134,9 +134,9 @@ screen task_detail_screen(i):
                     text recurrence_description(task) style "todo_text" size 32
                     textbutton "Quitar repetición" style "todo_button_small" text_style "todo_button_small_text" action Confirm("¿Dejar de repetir esta tarea?", Function(clear_recurrence, i))
                     $ _series_size = len(quest_series_members(task))
-                    $ _series_text = ("¿Cerrar la serie? Solo se borrará esta tarea." if _series_size == 1
-                        else "¿Cerrar la serie? Se borrarán las %d copias de la serie." % _series_size)
-                    textbutton "Cerrar serie" style "todo_button_small" text_style "todo_button_small_text" action Confirm(_series_text, [Function(close_recurrence_series, i), Hide("task_detail_screen")])
+                    $ _series_text = (_("¿Cerrar la serie? Solo se borrará esta tarea.") if _series_size == 1
+                        else _("¿Cerrar la serie? Se borrarán las %d copias de la serie.") % _series_size)
+                    textbutton _("Cerrar serie") style "todo_button_small" text_style "todo_button_small_text" action Confirm(_series_text, [Function(close_recurrence_series, i), Hide("task_detail_screen")])
         textbutton ("Reabrir tarea" if task["done"] else ("Finalizar misión" if quest_secondary() else "Completar tarea")) style "todo_button" text_style "todo_button_text" xalign 0.5 yalign 0.94 action Function(complete_task, i)
         use quest_guide
 

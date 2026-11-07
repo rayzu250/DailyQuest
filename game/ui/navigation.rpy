@@ -51,8 +51,8 @@ init python:
 
 screen quest_header(title):
     text title style "todo_title" size 54 xalign 0.5 ypos 50
-    textbutton "Volver" style "todo_button_small" text_style "todo_button_small_text" xpos 30 ypos 140 action Function(quest_navigate)
-    textbutton "Menú" style "todo_button_small" text_style "todo_button_small_text" xalign 1.0 xoffset -30 ypos 140 action Show("navigation_drawer")
+    textbutton _("Volver") style "todo_button_small" text_style "todo_button_small_text" xpos 30 ypos 140 action Function(quest_navigate)
+    textbutton _("Menú") style "todo_button_small" text_style "todo_button_small_text" xalign 1.0 xoffset -30 ypos 140 action Show("navigation_drawer")
 
 screen navigation_drawer():
     modal True
@@ -72,17 +72,17 @@ screen navigation_drawer():
         vbox:
             spacing 28
             text "Daily Quest" size 52 color "#FFFFFF"
-            textbutton "Mis tareas" style "todo_button" action Function(quest_navigate)
-            textbutton "Nueva tarea" style "todo_button" action Function(open_task_form)
-            textbutton "Mis listas" style "todo_button" action Function(quest_navigate, "lists_screen")
-            textbutton "Calendario" style "todo_button" action Function(quest_navigate, "calendar_screen")
-            textbutton "Mis logros" style "todo_button" action Function(quest_navigate, "progress_screen")
+            textbutton _("Mis tareas") style "todo_button" action Function(quest_navigate)
+            textbutton _("Nueva tarea") style "todo_button" action Function(open_task_form)
+            textbutton _("Mis listas") style "todo_button" action Function(quest_navigate, "lists_screen")
+            textbutton _("Calendario") style "todo_button" action Function(quest_navigate, "calendar_screen")
+            textbutton _("Mis logros") style "todo_button" action Function(quest_navigate, "progress_screen")
             if quest_secondary():
-                textbutton "Expediciones" style "todo_button" action Function(quest_navigate, "quest_world_hub")
-            textbutton "Cambiar mundo" style "todo_button" action Function(quest_navigate, "theme_screen")
-            textbutton "Opciones" style "todo_button" action Function(open_quest_options)
-            textbutton "Ayuda" style "todo_button" action [Hide("navigation_drawer"), Function(guide_help)]
-            textbutton "Cerrar menú" style "todo_button" action Hide("navigation_drawer")
+                textbutton _("Expediciones") style "todo_button" action Function(quest_navigate, "quest_world_hub")
+            textbutton _("Cambiar mundo") style "todo_button" action Function(quest_navigate, "theme_screen")
+            textbutton _("Opciones") style "todo_button" action Function(open_quest_options)
+            textbutton _("Ayuda") style "todo_button" action [Hide("navigation_drawer"), Function(guide_help)]
+            textbutton _("Cerrar menú") style "todo_button" action Hide("navigation_drawer")
 
 screen main_todo():
     on "show" action Function(quest_navigate)

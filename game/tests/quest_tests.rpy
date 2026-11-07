@@ -26,6 +26,10 @@ testsuite quest:
             store.world_progress = {}
             store.stage_themes = {}
             store.current_theme = "bosque"
+            # El idioma de las pruebas es siempre el original: un cambio de
+            # idioma persistido no puede envenenar futuros runs.
+            persistent.quest_language = "es"
+            quest_apply_language()
 
     testcase data_integrity:
         python:
@@ -187,6 +191,25 @@ testsuite quest:
         python:
             assert not tasks, "la cadena completa desapareció"
             assert completed_tasks == 2, ("logros de la serie", completed_tasks)
+
+    testcase language_toggle:
+        run Hide("task_detail_screen")
+        pause 0.5
+        python:
+            # Blindaje: si este caso aborta a mitad, el siguiente run
+            # arranca igual en el idioma original.
+            persistent.quest_language = "es"
+            quest_apply_language()
+        click "Menú"
+        click "Opciones"
+        assert screen "quest_options"
+        click "Idioma: Español / English"
+        python:
+            assert renpy.game.preferences.language == "english", ("idioma", renpy.game.preferences.language)
+        click "Language: Español / English"
+        python:
+            assert renpy.game.preferences.language is None, ("idioma revertido", renpy.game.preferences.language)
+        click "Volver"
 
     testcase text_and_navigation:
         click "Agregar tarea"

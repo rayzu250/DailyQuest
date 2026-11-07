@@ -18,13 +18,13 @@ screen quest_options_content(back_action):
         scrollbars "vertical"
         vbox:
             xsize 910
-            spacing 26
+            spacing 10
             text "Sonido" style "quest_option_heading"
             text "Música" style "quest_option_text"
             bar id "quest_music_volume" value Preference("music volume") style "quest_volume_bar"
             text "Efectos de sonido" style "quest_option_text"
             bar id "quest_sound_volume" value Preference("sound volume") style "quest_volume_bar"
-            textbutton "Silenciar todo" style "quest_option_button" action Preference("all mute", "toggle")
+            textbutton _("Silenciar todo") style "quest_option_button" action Preference("all mute", "toggle")
             null height 12
             text "Etapa escolar" style "quest_option_heading"
             for stage, profile in QUEST_SCHOOL_PROFILES.items():
@@ -47,10 +47,17 @@ screen quest_options_content(back_action):
                         selected persistent.quest_motion == mode
                         action Function(quest_setting, "quest_motion", mode)
             text "Reducidas: apariciones suaves, sin saltos.\nSin movimiento: imágenes y mensajes quietos." style "quest_option_hint"
-            textbutton "Mostrar a Guía":
+            textbutton _("Mostrar a Guía"):
                 style "quest_option_button"
                 selected persistent.quest_guide_enabled
                 action Function(quest_setting, "quest_guide_enabled", not persistent.quest_guide_enabled)
+            textbutton _("Sonido de recompensa"):
+                style "quest_option_button"
+                selected persistent.quest_reward_sound
+                action Function(quest_setting, "quest_reward_sound", not persistent.quest_reward_sound)
+            textbutton _("Idioma: Español / English"):
+                style "quest_option_button"
+                action Function(quest_toggle_language)
             textbutton ("Ocultar otras opciones" if advanced else "Otras opciones"):
                 style "quest_option_button"
                 action ToggleLocalVariable("advanced")
@@ -96,8 +103,8 @@ style quest_option_button:
     selected_background DynamicDisplayable(quest_button_surface, "selected")
     selected_hover_background DynamicDisplayable(quest_button_surface, "selected_hover")
     insensitive_background DynamicDisplayable(quest_button_surface, "insensitive")
-    padding (44, 20)
-    yminimum 100
+    padding (44, 10)
+    yminimum 80
 
 style quest_option_button_text:
     size 38
