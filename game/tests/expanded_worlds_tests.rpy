@@ -41,7 +41,6 @@ testsuite expanded_worlds:
             toggle_subtask(0, 0)
             toggle_subtask(0, 0)
             assert tasks[0]["subtasks"][0]["fruit"] == token
-            assert last_reward is None
             assert not guide_animated
             assert config.main_menu_music is None
             for name in QUEST_THEME_ART:

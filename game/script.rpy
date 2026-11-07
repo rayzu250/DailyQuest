@@ -5,9 +5,6 @@ default player_name = "Amigo"
 default completed_tasks = 0
 default current_theme = "bosque"
 
-# Preferencia antigua conservada únicamente por compatibilidad.
-default persistent.page_flip_enabled = False
-
 # Placeholders visuales hasta que exista arte real
 image bg_room = Solid("#1B5E20")
 image guia happy = "images/guias/red.png"
@@ -22,48 +19,13 @@ transform guia_center:
     yoffset -240
     zoom 1.5
 
-# Animación de estrella/fruta que aparece, sube y se desvanece (Pop-up de Dopamina)
-transform reward_pop_up:
-    anchor (0.5, 0.5)
-    zoom 0.3 alpha 0.0
-    parallel:
-        easein 0.25 zoom 1.3 alpha 1.0
-        easeout 0.15 zoom 1.0
-    parallel:
-        easeout 0.7 yoffset -80
-    linear 0.3 alpha 0.0
-
 # Pequeño salto de alegría para la mascota Guía al lograr un objetivo
 transform guia_happy_bounce:
-    xalign 0.5 yalign 1.0 yoffset -240 zoom 1.5
-    easein 0.12 yoffset -275
-    easeout 0.12 yoffset -240
-    easein 0.08 yoffset -255
-    easeout 0.08 yoffset -240
-
-# Variante del salto para la guía en miniatura dentro del popup de recompensa
-transform guia_reward_bounce:
-    zoom 0.45
-    easein 0.12 yoffset -40
-    easeout 0.12 yoffset 0
-    easein 0.08 yoffset -20
-    easeout 0.08 yoffset 0
-
-# Animación de entrada y salida suave para el panel lateral
-transform drawer_slide:
     on show:
         xoffset -450 alpha 0.0
         easein 0.25 xoffset 0 alpha 1.0
     on hide:
         easeout 0.20 xoffset -450 alpha 0.0
-
-init python:
-    # Compatibilidad con llamadas antiguas: la navegación ya no aplica el efecto.
-    def page_flip_or_none(old_widget=None, new_widget=None):
-        return None
-
-    def page_flip_back_or_none(old_widget=None, new_widget=None):
-        return None
 
 # Entrar por la acción oficial para salir correctamente del contexto de menú.
 label main_menu:
@@ -73,6 +35,8 @@ label main_menu:
 label start:
     $ quick_menu = False
     $ _game_menu_screen = None
+    # El idioma elegido sobrevive al reinicio de la app.
+    $ quest_apply_language()
     if restore_quest_data():
         jump main_menu_todo
     $ migrate_quest_data()

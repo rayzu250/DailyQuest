@@ -40,7 +40,6 @@ testsuite options_guide:
         click "Reducidas"
         python:
             assert persistent.quest_motion == "reduced"
-            assert page_flip_or_none() is None
         screenshot "options-motion"
         click "Sin movimiento"
         python:
@@ -98,15 +97,23 @@ testsuite options_guide:
             add_subtask(0, "Leer una página")
             toggle_subtask(0, 0)
             fruit = tasks[0]["subtasks"][0]["fruit"]
-            assert last_reward == fruit and guide_fruit == fruit
+            assert guide_fruit == fruit
             toggle_subtask(0, 0)
             toggle_subtask(0, 0)
             assert tasks[0]["subtasks"][0]["fruit"] == fruit
-            assert last_reward is None and not guide_animated
+            assert not guide_animated
             quest_setting("quest_guide_enabled", False)
         screenshot "guide-hidden"
         python:
+            # Los dos mandos son independientes: ocultar a Guía no silencia
+            # el aprendizaje y quitar el sonido no esconde a Guía.
+            assert persistent.quest_reward_sound, "el sonido nace activo"
+            quest_setting("quest_reward_sound", False)
+            assert persistent.quest_guide_enabled is False
             quest_setting("quest_guide_enabled", True)
+            assert not persistent.quest_reward_sound
+            quest_setting("quest_reward_sound", True)
+            assert persistent.quest_reward_sound
             quest_setting("quest_motion", "reduced")
             guide_help()
         screenshot "guide-reduced"
@@ -126,4 +133,5 @@ testcase quest_settings_restore:
         assert persistent.school_stage == "primaria"
         assert persistent.quest_motion == "normal"
         assert persistent.quest_guide_enabled
+        assert persistent.quest_reward_sound
         assert abs(_preferences.get_volume("music") - 0.35) < 0.01

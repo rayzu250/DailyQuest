@@ -8,9 +8,6 @@ init offset = -3
 default task_lists = ["General"]
 default current_list = "General"
 
-# Última fruta ganada (recompensa pendiente de mostrar en el popup)
-default last_reward = None
-
 init python:
     import datetime as _dt
     import calendar as _cal
@@ -216,13 +213,11 @@ init python:
             st = steps[subtask_index]
             new_state = not st.get("done", False)
             st["done"] = new_state
-            store.last_reward = None
             if new_state:
                 # Asigna fruta si no tiene una previa
                 first_completion = not st.get("fruit")
                 if first_completion:
                     st["fruit"] = random.choice(FRUITS)
-                    store.last_reward = st["fruit"]
                     quest_record_resource(store.tasks[task_index], st)
                 completed = sum(1 for step in steps if step.get("done"))
                 guide_event("Completaste %d de %d pasos." % (completed, len(steps)),

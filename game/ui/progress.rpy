@@ -69,14 +69,5 @@ screen progress_screen():
 
 
 ################################################################################
-## Pantalla: Popup de recompensa (fruta + guía)
-################################################################################
-
-screen reward_popup():
-    zorder 100
-    # Compatibilidad con partidas antiguas: ya no bloquear la pantalla.
-    timer 0.01 action Hide("reward_popup")
-
-################################################################################
 ## Pantalla: Detalles de tarea (subtareas)
 ################################################################################

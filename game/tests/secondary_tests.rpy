@@ -95,7 +95,7 @@ testsuite secondary:
             assert quest_world_balance("mecha") == 3
             toggle_subtask(0, 0)
             toggle_subtask(0, 0)
-            assert quest_world_balance("mecha") == 3 and last_reward is None
+            assert quest_world_balance("mecha") == 3
             quest_unlock_upgrade("mecha", 0)
             quest_unlock_upgrade("mecha", 0)
             quest_unlock_upgrade("mecha", 1)

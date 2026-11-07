@@ -1,5 +1,4 @@
 default tasks = []
-default max_tasks = 10
 default task_filter = "all"
 default data_version = 0
 default new_title = ""
