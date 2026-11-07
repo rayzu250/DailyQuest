@@ -2,6 +2,27 @@
 default persistent.school_stage = "primaria"
 default persistent.quest_motion = "normal"
 default persistent.quest_guide_enabled = True
+# El sonido de recompensa vive aparte: esconder la Guía no silencia el éxito.
+default persistent.quest_reward_sound = True
+# "es" es el idioma original del juego; "english" activa las traducciones.
+default persistent.quest_language = "es"
+
+init python:
+    # El selector de idioma solo reevalúa la interfaz navegable; el contenido
+    # de las tareas y los mensajes de la Guía siguen en el idioma original.
+    def quest_apply_language():
+        renpy.change_language("english" if persistent.quest_language == "english" else None)
+
+    def quest_toggle_language():
+        # El idioma de ejecución vive en preferences.language, no en
+        # config.language (que solo alimenta el arranque).
+        if renpy.game.preferences.language == "english":
+            persistent.quest_language = "es"
+        else:
+            persistent.quest_language = "english"
+        quest_apply_language()
+        renpy.save_persistent()
+
 default stage_themes = {}
 
 init -2 python:
@@ -44,7 +65,7 @@ init -2 python:
             return
         if name == "quest_motion" and value not in ("normal", "reduced", "off"):
             return
-        if name not in ("school_stage", "quest_motion", "quest_guide_enabled"):
+        if name not in ("school_stage", "quest_motion", "quest_guide_enabled", "quest_reward_sound"):
             return
         if name == "school_stage":
             # En el menú inicial, store todavía puede estar vacío: recuperar antes de guardar.

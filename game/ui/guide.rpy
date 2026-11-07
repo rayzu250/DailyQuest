@@ -15,8 +15,9 @@ init python:
         store.guide_reward_world = world
         store.guide_event_serial += 1
         store.guide_animated = True
-        # La preferencia del mezclador controla también las celebraciones.
-        if celebrate and persistent.quest_guide_enabled:
+        # El sonido ya no depende de que la Guía esté a la vista: la
+        # preferencia propia manda y la Guía activa lo conserva.
+        if celebrate and (persistent.quest_reward_sound or persistent.quest_guide_enabled):
             renpy.sound.play("audio/reward_ding.ogg")
 
     def guide_greet():
