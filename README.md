@@ -23,6 +23,18 @@ Repository: <https://github.com/rayzu250/DailyQuest> — exactly one public bran
   new clone with `Copy-Item tools\pre-push .git\hooks\pre-push`
   (PowerShell) or `cp tools/pre-push .git/hooks/pre-push` (sh).
 
+## Translations
+
+- The game's own language is Spanish. The navigable UI (menu drawer, page
+  headers, task filters, first-level settings and the delete/close-series
+  actions) is wrapped with `_(...)` and translated to English in
+  `game/i18n.rpy`.
+- User-generated content — task titles, list names, guide messages —
+  stays in the language it was written in.
+- To extend a translation: wrap the string with `_(...)` in its screen,
+  then add an `old`/`new` pair to `game/i18n.rpy`. The language switch
+  lives in Options; the choice persists across restarts.
+
 ## Commands
 
 - Run the game: `Ctrl+Shift+B` (task `Ren'Py: Run`), or F5 with `game/` open.
