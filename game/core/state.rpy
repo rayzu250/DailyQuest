@@ -3,6 +3,7 @@ default task_filter = "all"
 default data_version = 0
 default new_title = ""
 default task_title_draft = ""
+default subtask_text_draft = ""
 default new_subtask = ""
 default new_task_list = "General"
 default new_list_name = ""

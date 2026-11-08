@@ -60,6 +60,21 @@ init python:
             renpy.hide_screen("rename_task_screen")
         renpy.restart_interaction()
 
+    def open_rename_subtask_form(task_index, subtask_index):
+        if not 0 <= task_index < len(store.tasks):
+            return
+        steps = store.tasks[task_index].get("subtasks", [])
+        if not 0 <= subtask_index < len(steps):
+            return
+        store.subtask_text_draft = steps[subtask_index].get("text", "")
+        renpy.show_screen("rename_subtask_screen", i=task_index, j=subtask_index)
+
+    def save_subtask_title_form(task_index, subtask_index):
+        if rename_subtask(task_index, subtask_index, store.subtask_text_draft):
+            store.subtask_text_draft = ""
+            renpy.hide_screen("rename_subtask_screen")
+        renpy.restart_interaction()
+
 screen quest_header(title):
     text title style "todo_title" size 54 xalign 0.5 ypos 50
     textbutton _("Volver") style "todo_button_small" text_style "todo_button_small_text" xpos 30 ypos 140 action Function(quest_navigate)

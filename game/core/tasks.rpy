@@ -78,6 +78,22 @@ init python:
         renpy.notify("Tarea renombrada")
         return True
 
+    def rename_subtask(task_index, subtask_index, text):
+        # Mismo contrato que rename_task: el título vacío se rechaza y los
+        # índices inválidos devuelven False sin excepción.
+        text = text.strip()
+        if not text:
+            renpy.notify("Escribe el nombre del paso.")
+            return False
+        if not 0 <= task_index < len(store.tasks):
+            return False
+        steps = store.tasks[task_index].get("subtasks", [])
+        if not 0 <= subtask_index < len(steps):
+            return False
+        steps[subtask_index]["text"] = text
+        renpy.notify("Paso renombrado")
+        return True
+
     def complete_task(index):
         if 0 <= index < len(store.tasks):
             t = store.tasks[index]

@@ -42,3 +42,51 @@ testsuite rename_task:
             assert not rename_task(0, task_title_draft)
             assert tasks[0]["title"] == "Exposición de ciencias"
             _test.timeout = 5.0
+
+    testcase rename_subtask_preserves_step:
+        python:
+            assert "runtime-saves" in config.savedir.replace("\\", "/")
+            _test.timeout = 20.0
+        run Jump("main_menu_todo")
+        run Function(quest_navigate)
+        python:
+            store.tasks = []
+            store.task_lists = ["General"]
+            store.current_list = "General"
+            store.subtask_text_draft = ""
+            add_new_task("Bosquejo del mural")
+            add_subtask(0, "Boceto a lápiz")
+            original_step = dict(tasks[0]["subtasks"][0])
+            tasks[0]["subtasks"][0]["done"] = True
+            tasks[0]["subtasks"][0]["deadline"] = (2026, 11, 12)
+            original_id = tasks[0]["subtasks"][0]["id"]
+        run Show("task_detail_screen", i=0)
+        click "Renombrar"
+        assert screen "rename_subtask_screen"
+        python:
+            assert store.subtask_text_draft == "Boceto a lápiz", store.subtask_text_draft
+            store.subtask_text_draft = ""
+            renpy.restart_interaction()
+        click "Toca para escribir…"
+        type "Boceto de tinta final"
+        click "Listo"
+        click "Guardar nombre"
+        python:
+            assert not renpy.get_screen("rename_subtask_screen"), "subtask rename screen"
+            step = tasks[0]["subtasks"][0]
+            assert step["text"] == "Boceto de tinta final", ("text", step["text"])
+            assert step["id"] == original_id, ("id", step["id"], original_id)
+            assert step["done"], "done"
+            assert step["deadline"] == (2026, 11, 12), ("deadline", step["deadline"])
+            assert tasks[0]["subtasks"] == [step], ("step intacto", tasks[0]["subtasks"])
+            # Mismo contrato en el core: vacío se rechaza y no detiene el paso.
+            _blank = rename_subtask(0, 0, "   ")
+            assert not _blank, ("blank", _blank)
+            assert tasks[0]["subtasks"][0]["text"] == "Boceto de tinta final"
+            _oob = rename_subtask(0, 9, "ghost")
+            assert not _oob, ("out of range", _oob)
+            saved = quest_document()
+            store.tasks = []
+            _r = restore_quest_data()
+            assert _r and saved["tasks"][0]["subtasks"][0]["text"] == "Boceto de tinta final", ("restore", _r)
+            _test.timeout = 5.0
