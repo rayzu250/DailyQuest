@@ -78,6 +78,17 @@ testsuite quest:
             migrate_quest_data()
             assert tasks[0]["id"] and tasks[0]["subtasks"] == []
 
+    testcase long_names:
+        python:
+            _long_title = "T" * 120
+            add_new_task(_long_title)
+            assert tasks[0]["title"] == _long_title, ("title", len(tasks[0]["title"]))
+            add_subtask(0, "p" * 120)
+            assert tasks[0]["subtasks"][0]["text"] == "p" * 120, ("subtask", len(tasks[0]["subtasks"][0]["text"]))
+            save_quest_data()
+            migrate_quest_data()
+            assert quest_document()["tasks"][0]["title"] == _long_title
+
     testcase document_safety:
         python:
             saved_document = quest_document()

@@ -13,7 +13,7 @@ screen add_task_screen():
             spacing 30
             xsize 900
             text "¿Qué quieres hacer?" style "todo_text" textalign 0.0
-            use quest_text_field("new_title", "¿Qué quieres hacer?", 60)
+            use quest_text_field("new_title", "¿Qué quieres hacer?", 120)
             text "Lista: [new_task_list]" style "todo_text" size 32
             textbutton ("Ocultar opciones" if advanced else "Repetir esta tarea…") style "todo_button" action ToggleScreenVariable("advanced")
             if advanced:
