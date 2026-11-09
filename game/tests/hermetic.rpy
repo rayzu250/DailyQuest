@@ -11,6 +11,11 @@ python early:
     import sys
 
     if "test" in sys.argv and "--savedir" in sys.argv:
+        # Avisos de inicio silenciados en TODAS las suites: un Jump con
+        # tareas del testcase anterior mostraría un modal que rompería los
+        # clicks programados. La suite startup los reactiva en su before.
+        store._quest_test_no_startup_notices = True
+
         _real_persistent_update = renpy.persistent.update
 
         def _isolated_persistent_update(force_save=False):

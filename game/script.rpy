@@ -62,5 +62,7 @@ label main_menu_todo:
     $ _game_menu_screen = None
     $ migrate_quest_data()
     $ quest_sync_theme_music()
+    # Aviso de inicio (Fase 5): tareas de hoy / atrasadas, una vez por día.
+    $ quest_maybe_show_startup_notices()
     call screen view_tasks_screen
     return

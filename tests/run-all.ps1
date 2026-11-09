@@ -42,7 +42,9 @@ $chain = @(
     @{ t = 'help_notifications'; s = 60 },
     @{ t = 'illustrated_themes'; s = 70 },
     @{ t = 'options_guide'; s = 70 },
-    @{ t = 'reminders'; s = 70 }
+    @{ t = 'reminders'; s = 70 },
+    @{ t = 'rename_task'; s = 60 },
+    @{ t = 'startup'; s = 60 }
 )
 foreach ($item in $chain) {
     Invoke-Suite $item.t $item.s
