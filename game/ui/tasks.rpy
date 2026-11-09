@@ -122,7 +122,7 @@ screen task_detail_screen(i):
                             hbox:
                                 spacing 16
                                 textbutton ("Hecho ✓" if step["done"] else "Completar") style "todo_button_small" text_style "todo_button_small_text" action Function(toggle_subtask, i, j)
-                                textbutton "Renombrar" style "todo_button_small" text_style "todo_button_small_text" action Function(open_rename_subtask_form, i, j)
+                                textbutton _("Renombrar") style "todo_button_small" text_style "todo_button_small_text" action Function(open_rename_subtask_form, i, j)
                                 textbutton "Fecha" style "todo_button_small" text_style "todo_button_small_text" action Show("deadline_pick_screen", i=i, j=j)
                                 textbutton "Borrar" style "todo_button_small" text_style "todo_button_small_text" action Confirm("¿Borrar este paso?", Function(remove_subtask, i, j))
                 text "Agrega un paso pequeño" style "todo_text" size 36
@@ -171,8 +171,8 @@ screen rename_subtask_screen(i, j):
         background get_theme_panel()
         vbox:
             spacing 28
-            text "Cambiar nombre del paso" style "todo_text" size 42
-            use quest_text_field("subtask_text_draft", "Nombre del paso", 120)
+            text _("Cambiar nombre del paso") style "todo_text" size 42
+            use quest_text_field("subtask_text_draft", _("Nombre del paso"), 120)
             hbox:
                 spacing 24
                 textbutton "Guardar nombre" style "todo_button_small" text_style "todo_button_small_text" sensitive bool(subtask_text_draft.strip()) action Function(save_subtask_title_form, i, j)

@@ -83,7 +83,7 @@ init python:
         # índices inválidos devuelven False sin excepción.
         text = text.strip()
         if not text:
-            renpy.notify("Escribe el nombre del paso.")
+            renpy.notify(_("Escribe el nombre del paso."))
             return False
         if not 0 <= task_index < len(store.tasks):
             return False
@@ -91,7 +91,7 @@ init python:
         if not 0 <= subtask_index < len(steps):
             return False
         steps[subtask_index]["text"] = text
-        renpy.notify("Paso renombrado")
+        renpy.notify(_("Paso renombrado"))
         return True
 
     def complete_task(index):

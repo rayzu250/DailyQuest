@@ -25,13 +25,13 @@ screen quest_startup_overdue(count=0):
                 xysize (420, 420)
                 fit "contain"
                 xalign 0.5
-            text ("Dejaste %d tareas sin terminar." % count):
+            text (_("Dejaste %d tareas sin terminar.") % count):
                 style "todo_text"
                 size 42
                 color "#FFFFFF"
                 substitute False
                 textalign 0.5
-            text "Comandante no está contento. Hoy las retomamos, sin excusas.":
+            text _("Comandante no está contento. Hoy las retomamos, sin excusas."):
                 size 30
                 color "#D5EEE4"
                 textalign 0.5
@@ -55,13 +55,13 @@ screen quest_startup_due_today(count=0):
                 xysize (420, 420)
                 fit "contain"
                 xalign 0.5
-            text ("Hoy tienes %d tareas por completar." % count):
+            text (_("Hoy tienes %d tareas por completar.") % count):
                 style "todo_text"
                 size 42
                 color "#FFFFFF"
                 substitute False
                 textalign 0.5
-            text "Un paso pequeño es suficiente para empezar.":
+            text _("Un paso pequeño es suficiente para empezar."):
                 size 30
                 color "#D5EEE4"
                 textalign 0.5

@@ -114,7 +114,7 @@ init -2 python:
         for key, value in cfg.items():
             lo, hi = QUEST_POMODORO_LIMITS[key]
             if not lo <= value <= hi:
-                renpy.notify("Pomodoro: valores fuera de rango.")
+                renpy.notify(_("Pomodoro: valores fuera de rango."))
                 return False
         # Una pausa simple en curso se termina para no mezclar relojes.
         world_progress[world].pop("rest_until", None)
@@ -203,9 +203,9 @@ init -2 python:
             cfg = nodes.get("pomodoro_config") or QUEST_POMODORO_DEFAULTS
             for event in result["events"]:
                 if event == "work_done":
-                    renpy.notify("¡Bloque listo! Descansa %d minutos." % cfg["rest"])
+                    renpy.notify((_("¡Bloque listo! Descansa %d minutos.")) % cfg["rest"])
                 elif event == "rest_done":
-                    renpy.notify("¡Descanso terminado! Turno de concentrarse.")
+                    renpy.notify(_("¡Descanso terminado! Turno de concentrarse."))
                 elif event == "finished":
-                    renpy.notify("¡Pomodoro completo! %d bloques." % cfg["blocks"])
+                    renpy.notify((_("¡Pomodoro completo! %d bloques.")) % cfg["blocks"])
         renpy.restart_interaction()

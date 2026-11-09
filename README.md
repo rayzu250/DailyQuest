@@ -35,6 +35,17 @@ Repository: <https://github.com/rayzu250/DailyQuest> — exactly one public bran
   then add an `old`/`new` pair to `game/i18n.rpy`. The language switch
   lives in Options; the choice persists across restarts.
 
+## What's new in 1.3
+
+- Task and step names accept up to 120 characters, and steps can be
+  renamed from the task detail screen.
+- The project plan and reflection screen gains a notes field
+  (up to 500 characters), also shown in the library room.
+- The rest room adds a custom pomodoro (blocks, work and break minutes;
+  4 / 25 / 5 by default) next to the quick 5 / 10 / 15 minute pauses.
+- A startup reminder appears once a day: a friendly notice when tasks
+  are due today and a spinning-up Commander notice for overdue tasks.
+
 ## Commands
 
 - Run the game: `Ctrl+Shift+B` (task `Ren'Py: Run`), or F5 with `game/` open.

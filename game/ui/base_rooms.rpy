@@ -76,31 +76,31 @@ screen quest_base_room(world, number):
                         $ pom = quest_pomodoro_state(world)
                         if pom:
                             $ pstate = pom["state"]
-                            $ phase_caption = ("Trabajo" if pstate["phase"] == "work" else "Descanso")
-                            text ("Bloque %d de %d · %s" % (pstate["block"], pstate["blocks"], phase_caption)) size 36 color "#FFFFFF"
+                            $ phase_caption = (_("Trabajo") if pstate["phase"] == "work" else _("Descanso"))
+                            text ((_("Bloque %d de %d · %s") % (pstate["block"], pstate["blocks"], phase_caption))) size 36 color "#FFFFFF"
                             text ("%02d:%02d" % (pom["remaining"] // 60, pom["remaining"] % 60)) size 80 color "#FFFFFF" xalign 0.5
                             if pstate["phase"] == "work":
-                                text "Concéntrate en un solo paso hasta que suene el descanso." size 30 color "#D5EEE4"
+                                text _("Concéntrate en un solo paso hasta que suene el descanso.") size 30 color "#D5EEE4"
                             else:
-                                text "Levántate, estira y bebe agua. Vuelve para el siguiente bloque." size 30 color "#D5EEE4"
-                            textbutton "Terminar pomodoro" style "todo_button_small" action Function(quest_pomodoro_stop_action, world)
+                                text _("Levántate, estira y bebe agua. Vuelve para el siguiente bloque.") size 30 color "#D5EEE4"
+                            textbutton _("Terminar pomodoro") style "todo_button_small" action Function(quest_pomodoro_stop_action, world)
                         else:
                             hbox:
                                 spacing 16
                                 textbutton "−" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_blocks", -1)
-                                text "Bloques: [pomodoro_blocks]" size 32 color "#FFFFFF"
+                                text _("Bloques: [pomodoro_blocks]") size 32 color "#FFFFFF"
                                 textbutton "+" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_blocks", 1)
                             hbox:
                                 spacing 16
                                 textbutton "−" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_work", -5)
-                                text "Trabajo: [pomodoro_work] min" size 32 color "#FFFFFF"
+                                text _("Trabajo: [pomodoro_work] min") size 32 color "#FFFFFF"
                                 textbutton "+" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_work", 5)
                             hbox:
                                 spacing 16
                                 textbutton "−" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_rest", -1)
-                                text "Descanso: [pomodoro_rest] min" size 32 color "#FFFFFF"
+                                text _("Descanso: [pomodoro_rest] min") size 32 color "#FFFFFF"
                                 textbutton "+" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_rest", 1)
-                            textbutton "Empezar pomodoro" style "todo_button" text_style "todo_button_text" action Function(quest_pomodoro_start_action, world, number)
+                            textbutton _("Empezar pomodoro") style "todo_button" text_style "todo_button_text" action Function(quest_pomodoro_start_action, world, number)
                     text "La música respeta tu volumen actual. Esta pausa no envía notificaciones al teléfono ni cambia tus misiones." size 28 color "#D5EEE4"
         if role == "rest":
             timer 1.0 repeat True action Function(quest_pomodoro_poll, world)
