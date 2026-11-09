@@ -85,6 +85,28 @@ testsuite base_rooms:
             assert not quest_pomodoro_start("mecha", 2, 9, 25, 5)
             assert not quest_pomodoro_start("mecha", 2, 4, 3, 5)
             assert not quest_pomodoro_start("mecha", 2, 4, 25, 45)
+            # Steppers de la pantalla: aceptan el nombre largo del store y se
+            # recortan a los topes sin lanzar excepción (KeyError detectado
+            # en Android).
+            store.pomodoro_blocks = 2
+            quest_pomodoro_bump("pomodoro_blocks", -1)
+            assert store.pomodoro_blocks == 1, store.pomodoro_blocks
+            quest_pomodoro_bump("pomodoro_blocks", -1)
+            assert store.pomodoro_blocks == 1, store.pomodoro_blocks
+            quest_pomodoro_bump("pomodoro_work", -5)
+            assert store.pomodoro_work == 20, store.pomodoro_work
+            store.pomodoro_work = 88
+            quest_pomodoro_bump("pomodoro_work", 5)
+            assert store.pomodoro_work == 90, store.pomodoro_work
+            quest_pomodoro_bump("pomodoro_rest", -1)
+            assert store.pomodoro_rest == 4, store.pomodoro_rest
+            store.pomodoro_rest = 29
+            quest_pomodoro_bump("pomodoro_rest", 5)
+            assert store.pomodoro_rest == 30, store.pomodoro_rest
+            # La convención corta también debe funcionar.
+            store.pomodoro_blocks = 3
+            quest_pomodoro_bump("blocks", 1)
+            assert store.pomodoro_blocks == 4, store.pomodoro_blocks
             # Config mínima para recorrer el ciclo con reloj simulado: 2 bloques
             # de 5 minutos de trabajo y 1 de descanso.
             assert quest_pomodoro_start("mecha", 2, 2, 5, 1)

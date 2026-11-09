@@ -163,9 +163,14 @@ init -2 python:
 
     def quest_pomodoro_bump(key, delta):
         # Steppers de la pantalla: se recorta al rango permitido, nunca lanza.
-        value = int(getattr(store, key) + delta)
-        lo, hi = QUEST_POMODORO_LIMITS[key]
-        setattr(store, key, max(lo, min(hi, value)))
+        # La pantalla pasa el nombre del store ("pomodoro_rest"); los límites
+        # usan la clave corta ("rest"). Se aceptan ambas convenciones y la
+        # clave corta se traduce también al nombre del store.
+        short = key[len("pomodoro_"):] if key.startswith("pomodoro_") else key
+        name = key if key.startswith("pomodoro_") else "pomodoro_" + key
+        value = int(getattr(store, name) + delta)
+        lo, hi = QUEST_POMODORO_LIMITS[short]
+        setattr(store, name, max(lo, min(hi, value)))
         renpy.restart_interaction()
 
     def quest_pomodoro_start_action(world, number):
