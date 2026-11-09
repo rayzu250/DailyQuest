@@ -3,6 +3,7 @@ screen quest_base_room(world, number):
     zorder 185
     default board_status = "planned"
     key "game_menu" action Hide("quest_base_room")
+    on "show" action Function(quest_pomodoro_sync_drafts, world)
     add get_theme_bg()
     if quest_base_available(world, number):
         $ role = quest_base_role(world, number)
@@ -70,8 +71,38 @@ screen quest_base_room(world, number):
                     else:
                         for minutes in (5, 10, 15):
                             textbutton ("Descansar %d minutos" % minutes) style "todo_button_small" action Function(quest_base_start_rest, world, number, minutes)
+                        # Pomodoro personalizado: N bloques de trabajo de X minutos
+                        # y descansos de M minutos. Por defecto 4 / 25 / 5.
+                        $ pom = quest_pomodoro_state(world)
+                        if pom:
+                            $ pstate = pom["state"]
+                            $ phase_caption = ("Trabajo" if pstate["phase"] == "work" else "Descanso")
+                            text ("Bloque %d de %d · %s" % (pstate["block"], pstate["blocks"], phase_caption)) size 36 color "#FFFFFF"
+                            text ("%02d:%02d" % (pom["remaining"] // 60, pom["remaining"] % 60)) size 80 color "#FFFFFF" xalign 0.5
+                            if pstate["phase"] == "work":
+                                text "Concéntrate en un solo paso hasta que suene el descanso." size 30 color "#D5EEE4"
+                            else:
+                                text "Levántate, estira y bebe agua. Vuelve para el siguiente bloque." size 30 color "#D5EEE4"
+                            textbutton "Terminar pomodoro" style "todo_button_small" action Function(quest_pomodoro_stop_action, world)
+                        else:
+                            hbox:
+                                spacing 16
+                                textbutton "−" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_blocks", -1)
+                                text "Bloques: [pomodoro_blocks]" size 32 color "#FFFFFF"
+                                textbutton "+" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_blocks", 1)
+                            hbox:
+                                spacing 16
+                                textbutton "−" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_work", -5)
+                                text "Trabajo: [pomodoro_work] min" size 32 color "#FFFFFF"
+                                textbutton "+" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_work", 5)
+                            hbox:
+                                spacing 16
+                                textbutton "−" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_rest", -1)
+                                text "Descanso: [pomodoro_rest] min" size 32 color "#FFFFFF"
+                                textbutton "+" style "todo_button_small" text_style "todo_button_small_text" action Function(quest_pomodoro_bump, "pomodoro_rest", 1)
+                            textbutton "Empezar pomodoro" style "todo_button" text_style "todo_button_text" action Function(quest_pomodoro_start_action, world, number)
                     text "La música respeta tu volumen actual. Esta pausa no envía notificaciones al teléfono ni cambia tus misiones." size 28 color "#D5EEE4"
         if role == "rest":
-            timer 1.0 repeat True action Function(renpy.restart_interaction)
+            timer 1.0 repeat True action Function(quest_pomodoro_poll, world)
     else:
         timer 0.01 action Hide("quest_base_room")

@@ -1,7 +1,17 @@
 # Herramientas compartidas; cada mundo conserva sus recursos y desbloqueos.
+# Borradores de la configuración del pomodoro (Fase 5): por defecto
+# 4 bloques de 25 minutos de trabajo y 5 de descanso.
+default pomodoro_blocks = 4
+default pomodoro_work = 25
+default pomodoro_rest = 5
+
 init -2 python:
     import time as _base_time
     import math as _base_math
+    # En Ren'Py el `dict` del store es RevertableDict; para validar tanto
+    # contenedores revertables como dicts planos (JSON restaurado) usamos
+    # el builtin real, igual que hace quest_valid_document.
+    import builtins as _base_builtins
 
     QUEST_BASE_ROLES = {
         "mecha": ("planning", "library", "rest"),
@@ -80,4 +90,122 @@ init -2 python:
         if world in world_progress:
             world_progress[world].pop("rest_until", None)
             save_quest_data()
+        renpy.restart_interaction()
+
+    # --- Pomodoro personalizado (Fase 5) ---
+    # Las pausas rápidas 5/10/15 quedan intactas; este estado aparte usa un
+    # reloj absoluto (ends_at) para sobrevivir a la suspensión de Android y
+    # al "Forzar detención". OJO: descanso solo ENTRE bloques; el último
+    # bloque de trabajo cierra el ciclo ya.
+    QUEST_POMODORO_DEFAULTS = {"blocks": 4, "work": 25, "rest": 5}
+    QUEST_POMODORO_LIMITS = {"blocks": (1, 8), "work": (5, 90), "rest": (1, 30)}
+
+    def quest_pomodoro_room(world, number):
+        return (quest_base_available(world, number)
+            and quest_base_role(world, number) == "rest")
+
+    def quest_pomodoro_start(world, number, blocks, work, rest):
+        if not quest_pomodoro_room(world, number):
+            return False
+        try:
+            cfg = {"blocks": int(blocks), "work": int(work), "rest": int(rest)}
+        except (TypeError, ValueError):
+            return False
+        for key, value in cfg.items():
+            lo, hi = QUEST_POMODORO_LIMITS[key]
+            if not lo <= value <= hi:
+                renpy.notify("Pomodoro: valores fuera de rango.")
+                return False
+        # Una pausa simple en curso se termina para no mezclar relojes.
+        world_progress[world].pop("rest_until", None)
+        world_progress[world]["pomodoro_config"] = cfg
+        world_progress[world]["pomodoro"] = {
+            "blocks": cfg["blocks"], "work": cfg["work"], "rest": cfg["rest"],
+            "block": 1, "phase": "work",
+            "ends_at": _base_time.time() + cfg["work"] * 60,
+        }
+        save_quest_data()
+        renpy.restart_interaction()
+        return True
+
+    def quest_pomodoro_state(world, now=None):
+        # Estado fresco tras avanzar todas las fases vencidas: al volver de la
+        # suspensión, el tiempo transcurrido con la app cerrada cuenta igual.
+        state = world_progress.get(world, {}).get("pomodoro")
+        if not isinstance(state, _base_builtins.dict) or "ends_at" not in state:
+            return None
+        seconds = _base_time.time() if now is None else float(now)
+        events = []
+        while state["ends_at"] <= seconds:
+            if state["phase"] == "work":
+                if state["block"] >= state["blocks"]:
+                    del world_progress[world]["pomodoro"]
+                    events.append("finished")
+                    return {"state": None, "remaining": 0, "events": events}
+                state["phase"] = "rest"
+                state["ends_at"] += state["rest"] * 60
+                events.append("work_done")
+            else:
+                state["block"] += 1
+                state["phase"] = "work"
+                state["ends_at"] += state["work"] * 60
+                events.append("rest_done")
+        # Sin I/O aquí: guardar es responsabilidad del caller (poll), para que
+        # esta función sea predecible con el reloj simulado de los tests.
+        remaining = max(0, int(_base_math.ceil(state["ends_at"] - seconds)))
+        return {"state": state, "remaining": remaining, "events": events}
+
+    def quest_pomodoro_stop(world):
+        if world in world_progress and world_progress[world].pop("pomodoro", None) is not None:
+            save_quest_data()
+        renpy.restart_interaction()
+        return True
+
+    def quest_pomodoro_bump(key, delta):
+        # Steppers de la pantalla: se recorta al rango permitido, nunca lanza.
+        value = int(getattr(store, key) + delta)
+        lo, hi = QUEST_POMODORO_LIMITS[key]
+        setattr(store, key, max(lo, min(hi, value)))
+        renpy.restart_interaction()
+
+    def quest_pomodoro_start_action(world, number):
+        # Acción de pantalla: si una acción devolviera True (el contrato de la
+        # API para tests), renpy terminaría la interacción y cerraría el cuarto.
+        quest_pomodoro_start(world, number, store.pomodoro_blocks,
+            store.pomodoro_work, store.pomodoro_rest)
+
+    def quest_pomodoro_stop_action(world):
+        quest_pomodoro_stop(world)
+
+    def quest_pomodoro_sync_drafts(world):
+        # Arranque de pantalla: los steppers muestran la última configuración
+        # usada en ese cuarto; si no hubo, los valores por defecto.
+        cfg = dict(QUEST_POMODORO_DEFAULTS)
+        saved = world_progress.get(world, {}).get("pomodoro_config")
+        if isinstance(saved, _base_builtins.dict):
+            for key in cfg:
+                lo, hi = QUEST_POMODORO_LIMITS[key]
+                value = saved.get(key, cfg[key])
+                cfg[key] = value if lo <= value <= hi else cfg[key]
+        store.pomodoro_blocks = cfg["blocks"]
+        store.pomodoro_work = cfg["work"]
+        store.pomodoro_rest = cfg["rest"]
+
+    def quest_pomodoro_poll(world):
+        # El temporizador de pantalla llama esto cada segundo; también cumple
+        # con el refresco de las pausas simples (rest_until). Las transiciones
+        # detectadas se guardan aquí, no dentro de quest_pomodoro_state.
+        result = quest_pomodoro_state(world)
+        if result and result["events"]:
+            save_quest_data()
+        nodes = world_progress.get(world, {})
+        if result:
+            cfg = nodes.get("pomodoro_config") or QUEST_POMODORO_DEFAULTS
+            for event in result["events"]:
+                if event == "work_done":
+                    renpy.notify("¡Bloque listo! Descansa %d minutos." % cfg["rest"])
+                elif event == "rest_done":
+                    renpy.notify("¡Descanso terminado! Turno de concentrarse.")
+                elif event == "finished":
+                    renpy.notify("¡Pomodoro completo! %d bloques." % cfg["blocks"])
         renpy.restart_interaction()

@@ -77,6 +77,84 @@ testsuite base_rooms:
             assert not quest_base_available("mecha", 2)
             _test.timeout = 5.0
 
+    testcase pomodoro_cycle:
+        python:
+            quest_unlock_upgrade("mecha", 2)
+            # Valores inválidos rechazados sin excepción (límites 1-8/5-90/1-30).
+            assert not quest_pomodoro_start("mecha", 2, 0, 25, 5)
+            assert not quest_pomodoro_start("mecha", 2, 9, 25, 5)
+            assert not quest_pomodoro_start("mecha", 2, 4, 3, 5)
+            assert not quest_pomodoro_start("mecha", 2, 4, 25, 45)
+            # Config mínima para recorrer el ciclo con reloj simulado: 2 bloques
+            # de 5 minutos de trabajo y 1 de descanso.
+            assert quest_pomodoro_start("mecha", 2, 2, 5, 1)
+            state = world_progress["mecha"]["pomodoro"]
+            assert state["phase"] == "work" and state["block"] == 1
+            deadline = state["ends_at"]
+            fresh = quest_pomodoro_state("mecha", deadline - 30)
+            assert fresh["state"]["phase"] == "work" and fresh["remaining"] == 30, fresh
+            # 1) Termina el trabajo del bloque 1 → descanso.
+            turn = quest_pomodoro_state("mecha", deadline)
+            assert isinstance(turn, dict), ("turn no es dict", turn)
+            assert turn["events"] == ["work_done"], ("turn", turn)
+            assert turn["state"]["phase"] == "rest" and turn["state"]["block"] == 1, ("fase", turn)
+            rest_end = turn["state"]["ends_at"]
+            turn = quest_pomodoro_state("mecha", rest_end)
+            assert turn["events"] == ["rest_done"], turn
+            assert turn["state"]["block"] == 2 and turn["state"]["phase"] == "work"
+            # El último bloque de trabajo cierra el ciclo (no hay descanso final).
+            turn = quest_pomodoro_state("mecha", turn["state"]["ends_at"])
+            assert turn["events"] == ["finished"], turn
+            assert turn["state"] is None and "pomodoro" not in world_progress["mecha"]
+        run Function(quest_base_open, "mecha", 2)
+        screenshot "base-pomodoro-config"
+        click "Empezar pomodoro"
+        screenshot "base-pomodoro-active"
+        python:
+            state = world_progress["mecha"]["pomodoro"]
+            assert state["block"] == 1 and state["phase"] == "work", state
+            # La configuración usada quedó guardada para la próxima vez.
+            assert world_progress["mecha"]["pomodoro_config"] == {"blocks": 2, "work": 5, "rest": 1}, state
+        click "Terminar pomodoro"
+        python:
+            assert "pomodoro" not in world_progress["mecha"]
+            # Las pausas 5/10/15 siguen intactas junto al pomodoro.
+            quest_base_start_rest("mecha", 2, 10)
+            assert world_progress["mecha"]["rest_until"] > 0
+            quest_pomodoro_start("mecha", 2, 1, 5, 1)
+            assert "rest_until" not in world_progress["mecha"] and "pomodoro" in world_progress["mecha"]
+            quest_pomodoro_stop("mecha")
+            assert "pomodoro" not in world_progress["mecha"]
+            _test.timeout = 5.0
+
+    testcase pomodoro_persistence:
+        # El estado pomodoro sobrevive el round-trip JSON del documento.
+        python:
+            quest_unlock_upgrade("mecha", 2)
+            assert quest_pomodoro_start("mecha", 2, 2, 5, 1)
+            snapshot = quest_document()
+            store.world_progress = {}
+            assert restore_quest_data()
+            state = world_progress["mecha"]["pomodoro"]
+            assert state["phase"] == "work" and state["block"] == 1, state
+            assert state["blocks"] == 2 and state["work"] == 5 and state["rest"] == 1, state
+            # El reloj simulado sigue avanzando el ciclo tras restaurar.
+            deadline = state["ends_at"]
+            turn = quest_pomodoro_state("mecha", deadline)
+            assert turn["events"] == ["work_done"], turn
+            assert turn["state"]["phase"] == "rest" and turn["state"]["block"] == 1, turn
+            # En el juego el poll del temporizador guarda cada transición; el
+            # test lo replica antes del round-trip.
+            save_quest_data()
+            # La configuración usada quedó guardada para la próxima vez.
+            assert world_progress["mecha"]["pomodoro_config"] == {"blocks": 2, "work": 5, "rest": 1}, state
+            saved = quest_document()
+            store.world_progress = {}
+            assert restore_quest_data() and quest_document() == saved, "round trip"
+            quest_pomodoro_stop("mecha")
+            assert "pomodoro" not in world_progress["mecha"]
+            _test.timeout = 5.0
+
     testcase world_mappings:
         python:
             for stage in QUEST_SCHOOL_PROFILES:
