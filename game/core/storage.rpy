@@ -44,6 +44,8 @@ init -2 python:
                     names = QUEST_EXPEDITIONS[expedition["world"]]["crew"]
                     if not isinstance(expedition.get("crew"), int) or not 0 <= expedition["crew"] < len(names):
                         expedition["crew"] = 0
+                # Las notas nacen con tareas migradas (Fase 5).
+                expedition.setdefault("notes", "")
             for step in task["subtasks"]:
                 step.setdefault("id", new_quest_id())
                 step.setdefault("deadline", None)

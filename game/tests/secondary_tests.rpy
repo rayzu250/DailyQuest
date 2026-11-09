@@ -255,3 +255,39 @@ testsuite secondary:
         click "Opciones"
         click "Más grande"
         screenshot "secondary-stage-options-large"
+
+    testcase plan_notes:
+        python:
+            quest_setting("school_stage", "secundaria")
+        python:
+            # La migración crea la clave vacía en expediciones antiguas.
+            add_new_task("Proyecto de notas")
+            add_subtask(0, "Primera nota")
+            del tasks[0]["expedition"]["notes"]
+            migrate_quest_data()
+            assert tasks[0]["expedition"]["notes"] == "", "migracion notas"
+        run Show("task_detail_screen", i=0)
+        click "Plan y reflexión"
+        assert screen "quest_expedition_plan"
+        python:
+            assert store.expedition_notes_draft == "", "borrador nace vacío"
+            store.expedition_notes_draft = "A" * 500
+            renpy.restart_interaction()
+        click "Guardar"
+        python:
+            assert tasks[0]["expedition"]["notes"] == "A" * 500, ("500 exactos", len(tasks[0]["expedition"]["notes"]))
+            # Más de 500 se recorta al guardar (defensa por si otro camino edita el draft).
+            store.expedition_notes_draft = "B" * 520
+            quest_save_plan(0)
+            assert tasks[0]["expedition"]["notes"] == "B" * 500, ("recorte", len(tasks[0]["expedition"]["notes"]))
+            store.expedition_notes_draft = ""
+            quest_open_plan(0)
+            assert store.expedition_notes_draft == "B" * 500, ("recarga", len(store.expedition_notes_draft))
+            renpy.hide_screen("quest_expedition_plan")
+            # Las notas sobreviven guardar/restaurar.
+            saved = quest_document()
+            store.tasks = []
+            assert restore_quest_data()
+            assert quest_document() == saved, "restore notas"
+            assert tasks[0]["expedition"]["notes"] == "B" * 500
+        run Hide("task_detail_screen")

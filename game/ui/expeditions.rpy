@@ -120,6 +120,10 @@ screen quest_expedition_plan(index):
                     textbutton caption style "todo_button_small" text_size 30 selected tasks[index].get("priority", 1) == value action Function(quest_set_priority, index, value)
             text "¿Qué funcionó y qué cambiarías?" style "todo_text" size 36
             use quest_text_field("expedition_reflection_draft", "Reflexión opcional", 180)
+            text "Notas" style "todo_text" size 36
+            use quest_text_field("expedition_notes_draft", "Notas (hasta 500 caracteres)", 500)
+            $ note_len = len(expedition_notes_draft)
+            text ("[note_len]/500") style "todo_text" size 26 color "#D5EEE4"
             text "Puedes dejarlo vacío. Las listas pueden representar tus materias." style "todo_text" size 30
     hbox:
         xalign 0.5 ypos 1610 spacing 24

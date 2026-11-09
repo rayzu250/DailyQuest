@@ -53,6 +53,8 @@ screen quest_base_room(world, number):
                                 text item["title"] size 34 color "#FFFFFF" substitute False
                                 text ("Objetivo: " + (plan.get("goal") or "Sin objetivo escrito")) size 30 color "#FFFFFF" substitute False
                                 text ("Aprendizaje: " + (plan.get("reflection") or "Puedes escribir una reflexión al abrir el proyecto.")) size 30 color "#D5EEE4" substitute False
+                                if plan.get("notes"):
+                                    text ("Notas: " + plan["notes"]) size 28 color "#FFFFFF" substitute False
                                 textbutton "Consultar proyecto" style "todo_button_small" text_size 30 action Function(quest_base_task, item["id"])
                                 textbutton "Crear proyecto similar" style "todo_button_small" text_size 30 action Function(quest_base_reuse, world, number, item["id"])
                 else:

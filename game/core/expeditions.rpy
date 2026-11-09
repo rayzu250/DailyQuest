@@ -2,6 +2,7 @@
 default world_progress = {}
 default expedition_goal_draft = ""
 default expedition_reflection_draft = ""
+default expedition_notes_draft = ""
 
 init -2 python:
     QUEST_EXPEDITIONS = {
@@ -46,7 +47,7 @@ init -2 python:
         if world not in QUEST_EXPEDITIONS:
             world = "mecha"
         return {"world": world, "crew": 0, "state": "planned", "goal": "",
-            "reflection": "", "finished_at": None}
+            "reflection": "", "notes": "", "finished_at": None}
 
     def quest_task_expedition(task):
         expedition = task.get("expedition")
@@ -205,6 +206,7 @@ init -2 python:
         expedition = quest_task_expedition(tasks[index])
         store.expedition_goal_draft = expedition.get("goal", "") if expedition else ""
         store.expedition_reflection_draft = expedition.get("reflection", "") if expedition else ""
+        store.expedition_notes_draft = expedition.get("notes", "") if expedition else ""
         renpy.show_screen("quest_expedition_plan", index=index)
 
     def quest_save_plan(index):
@@ -214,6 +216,8 @@ init -2 python:
                 task["expedition"] = quest_new_expedition()
             task["expedition"]["goal"] = expedition_goal_draft.strip()
             task["expedition"]["reflection"] = expedition_reflection_draft.strip()
+            # Red de seguridad: el editor limita a 500, pero recortamos igual.
+            task["expedition"]["notes"] = expedition_notes_draft.strip()[:500]
             save_quest_data()
         renpy.hide_screen("quest_expedition_plan")
 
