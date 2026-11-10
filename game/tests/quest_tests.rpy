@@ -251,6 +251,23 @@ testsuite quest:
             assert renpy.game.preferences.language is None, ("idioma revertido", renpy.game.preferences.language)
         click "Volver"
 
+    testcase pending_filter_and_order:
+        # "Pendientes" sustituye a "7 días": muestra solo las tareas abiertas.
+        python:
+            add_new_task("Tarea abierta")
+            add_new_task("Tarea cerrada")
+            tasks[1]["done"] = True
+        click "Pendientes"
+        python:
+            assert store.task_filter == "open", ("filtro", store.task_filter)
+            assert [tasks[i]["title"] for i in visible_task_indices()] == ["Tarea abierta"], \
+                ("pendientes", [tasks[i]["title"] for i in visible_task_indices()])
+        click "Todas"
+        python:
+            assert store.task_filter == "all", ("filtro", store.task_filter)
+            assert len(visible_task_indices()) == 2, ("todas", len(visible_task_indices()))
+            assert {tasks[i]["title"] for i in visible_task_indices()} == {"Tarea abierta", "Tarea cerrada"}
+
     testcase text_and_navigation:
         click "Agregar tarea"
         assert screen "add_task_screen"

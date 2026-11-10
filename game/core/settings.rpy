@@ -83,8 +83,6 @@ init -2 python:
             renpy.hide_screen("quest_expedition_scene")
             renpy.hide_screen("quest_expedition_plan")
             renpy.hide_screen("quest_world_hub")
-            if not quest_secondary() and store.task_filter == "week":
-                store.task_filter = "all"
         if name == "quest_motion":
             renpy.run(Preference("transitions", "none" if value == "off" else "all"))
         renpy.save_persistent()

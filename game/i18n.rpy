@@ -59,8 +59,8 @@ translate english strings:
     old "Sin fecha"
     new "No date"
 
-    old "7 días"
-    new "7 days"
+    old "Pendientes"
+    new "Pending"
 
     # --- Fase 2: borrar y cerrar serie ---
 

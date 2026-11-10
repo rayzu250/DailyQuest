@@ -9,10 +9,8 @@ init python:
                 continue
             if store.task_filter == "undated" and (date or task.get("done")):
                 continue
-            if store.task_filter == "week":
-                week_end = _dt.date(*today_tuple()) + _dt.timedelta(days=6)
-                if task.get("done") or not date or not (today_tuple() <= tuple(date) <= (week_end.year, week_end.month, week_end.day)):
-                    continue
+            if store.task_filter == "open" and task.get("done"):
+                continue
             result.append(i)
         return sorted(result, key=lambda i: (store.tasks[i].get("done", False), store.tasks[i].get("priority", 1) if quest_secondary() else 1))
 
@@ -28,14 +26,12 @@ screen view_tasks_screen():
     textbutton _("Lista: [current_list] ▾") style "todo_button" text_size 34 xalign 0.5 ypos 265 action Function(quest_navigate, "lists_screen")
     hbox:
         xalign 0.5 ypos 390 spacing 16
-        for value, caption in [("all", _("Todas")), ("today", _("Hoy")), ("undated", _("Sin fecha"))]:
+        for value, caption in [("all", _("Todas")), ("today", _("Hoy")), ("undated", _("Sin fecha")), ("open", _("Pendientes"))]:
             textbutton caption:
                 style "todo_button_small"
                 text_style "todo_button_small_text"
                 selected task_filter == value
                 action SetVariable("task_filter", value)
-        if quest_secondary():
-            textbutton _("7 días") style "todo_button_small" text_style "todo_button_small_text" selected task_filter == "week" action SetVariable("task_filter", "week")
     $ shown = visible_task_indices()
     viewport:
         xpos 50 ypos 505 xsize 980 ysize (940 if persistent.quest_guide_enabled else 1060)
