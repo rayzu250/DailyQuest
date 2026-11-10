@@ -267,6 +267,19 @@ testsuite quest:
             assert store.task_filter == "all", ("filtro", store.task_filter)
             assert len(visible_task_indices()) == 2, ("todas", len(visible_task_indices()))
             assert {tasks[i]["title"] for i in visible_task_indices()} == {"Tarea abierta", "Tarea cerrada"}
+            # Orden ascendente A→Z sin acentos; las completadas al final.
+            tasks[0]["title"] = "Zeta"
+            tasks[0]["subtasks"] = []
+            add_subtask(0, "Paso Z")
+            add_subtask(0, "Paso A")
+            add_new_task("Árbol")
+            add_new_task("Alfa")
+            tasks[1]["done"] = True
+            _orden = [tasks[i]["title"] for i in visible_task_indices()]
+            assert _orden == ["Alfa", "Árbol", "Zeta", "Tarea cerrada"], ("orden", _orden)
+            # Los pasos de Zeta conservan su orden manual.
+            _pasos = [s["text"] for s in tasks[0]["subtasks"]]
+            assert _pasos == ["Paso Z", "Paso A"], ("pasos", _pasos)
 
     testcase text_and_navigation:
         click "Agregar tarea"

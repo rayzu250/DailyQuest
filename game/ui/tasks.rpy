@@ -1,4 +1,11 @@
 init python:
+    import unicodedata
+
+    def quest_sort_key(text):
+        # Orden ascendente sin distinguir acentos ni mayúsculas.
+        normalized = unicodedata.normalize("NFKD", text or "")
+        return "".join(ch for ch in normalized if not unicodedata.combining(ch)).casefold()
+
     def visible_task_indices():
         result = []
         for i, task in enumerate(store.tasks):
@@ -12,7 +19,9 @@ init python:
             if store.task_filter == "open" and task.get("done"):
                 continue
             result.append(i)
-        return sorted(result, key=lambda i: (store.tasks[i].get("done", False), store.tasks[i].get("priority", 1) if quest_secondary() else 1))
+        # Orden A→Z; las tareas completadas quedan al final. Los pasos de
+        # cada tarea nunca se reordenan: se muestran tal como se escribieron.
+        return sorted(result, key=lambda i: (store.tasks[i].get("done", False), quest_sort_key(store.tasks[i].get("title", ""))))
 
 screen view_tasks_screen():
     modal True
