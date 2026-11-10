@@ -307,3 +307,36 @@ testsuite secondary:
             assert quest_document() == saved, "restore notas"
             assert tasks[0]["expedition"]["notes"] == "B" * 500
         run Hide("task_detail_screen")
+
+    testcase notes_wrap:
+        # Cadena sin espacios: el texto debe envolverse dentro del cuadro,
+        # no recortarse ni desbordarse (bug reportado en Android).
+        python:
+            quest_setting("school_stage", "secundaria")
+        python:
+            add_new_task("Proyecto sin espacios")
+        run Show("task_detail_screen", i=0)
+        click "Plan y reflexión"
+        assert screen "quest_expedition_plan"
+        python:
+            _test.timeout = 30.0
+            store.expedition_goal_draft = "Meta"
+            store.expedition_reflection_draft = "Retro"
+            store.expedition_notes_draft = ""
+            renpy.restart_interaction()
+        click "Toca para escribir…"
+        assert screen "quest_text_editor"
+        type "iiuhb6v6v6v6v6v6v7b8888n8n8nnkiiuuuuuuuuyyh88n8n8nnfkko00998877llmmnnjjhhffddssqqoonnmmiireewweerrttyyuuiiooppzzxxccvvbb"
+        screenshot "notes-wrap-editor"
+        click "Listo"
+        python:
+            _notas_largas = "iiuhb6v6v6v6v6v6v7b8888n8n8nnkiiuuuuuuuuyyh88n8n8nnfkko00998877llmmnnjjhhffddssqqoonnmmiireewweerrttyyuuiiooppzzxxccvvbb"
+            assert len(_notas_largas) > 110, ("escaqueo del test", len(_notas_largas))
+            assert store.expedition_notes_draft == _notas_largas, ("sin recorte", len(store.expedition_notes_draft))
+        click "Guardar"
+        # Al reabrir se valida el campo visible con la cadena guardada.
+        click "Plan y reflexión"
+        screenshot "notes-wrap-field"
+        python:
+            assert store.expedition_notes_draft == _notas_largas, ("recargada", len(store.expedition_notes_draft))
+        run Hide("task_detail_screen")

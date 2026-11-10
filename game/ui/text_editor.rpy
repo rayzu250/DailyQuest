@@ -22,6 +22,12 @@ init python:
         else:
             close_text_editor(target, "", False, onboarding)
 
+    def quest_text_needs_break(text):
+        # Una cadena sin espacios mรกs larga que esto no cabe en el campo
+        # (850 px a size 40) y se sale del cuadro; con "anywhere" se parte
+        # donde haga falta. El texto normal conserva el corte por palabras.
+        return any(len(token) > 24 for token in (text or "").split())
+
 screen quest_text_editor(target, prompt, limit=60, onboarding=False):
     modal True
     zorder 200
@@ -59,6 +65,8 @@ screen quest_text_editor(target, prompt, limit=60, onboarding=False):
                     size 40
                     color "#152B24"
                     xsize 850
+                    layout "subtitle"
+                    language ("anywhere" if quest_text_needs_break(draft) else "western")
             text "Toca el texto para escribir." size 28 color "#D5EEE4"
             hbox:
                 spacing 24
@@ -66,11 +74,14 @@ screen quest_text_editor(target, prompt, limit=60, onboarding=False):
                 textbutton "Cancelar" style "todo_button_small" text_style "todo_button_small_text" action Function(close_text_editor, target, draft, False, onboarding)
 
 screen quest_text_field(target, prompt, limit=60):
-    textbutton (getattr(store, target) or "Toca para escribir…"):
+    $ _field_text = getattr(store, target) or "Toca para escribir…"
+    textbutton _field_text:
+        substitute False
         background Solid("#FFFFFF")
         padding (24, 24)
         xfill True
         text_color "#152B24"
         text_size 38
         text_layout "subtitle"
+        text_language ("anywhere" if quest_text_needs_break(_field_text) else "western")
         action Show("quest_text_editor", target=target, prompt=prompt, limit=limit)
