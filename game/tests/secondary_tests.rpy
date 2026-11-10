@@ -271,6 +271,22 @@ testsuite secondary:
         assert screen "quest_expedition_plan"
         python:
             assert store.expedition_notes_draft == "", "borrador nace vacío"
+            # Sin ambigüedad de placeholder: solo Notas queda por escribir.
+            store.expedition_goal_draft = "Meta del proyecto"
+            store.expedition_reflection_draft = "Retro del proyecto"
+            renpy.restart_interaction()
+        # Escritura real en el editor: debe llegar completa a la pantalla
+        # (pixel_width recortaba la entrada a ~34 caracteres).
+        click "Toca para escribir…"
+        assert screen "quest_text_editor"
+        python:
+            _test.timeout = 30.0
+        type "Notas escritas con teclado real para validar el tope largo"
+        click "Listo"
+        python:
+            _notes_typed = "Notas escritas con teclado real para validar el tope largo"
+            assert len(store.expedition_notes_draft) == len(_notes_typed), ("editor notas", len(store.expedition_notes_draft))
+        python:
             store.expedition_notes_draft = "A" * 500
             renpy.restart_interaction()
         click "Guardar"

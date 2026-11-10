@@ -59,7 +59,6 @@ screen quest_text_editor(target, prompt, limit=60, onboarding=False):
                     size 40
                     color "#152B24"
                     xsize 850
-                    pixel_width 850
             text "Toca el texto para escribir." size 28 color "#D5EEE4"
             hbox:
                 spacing 24

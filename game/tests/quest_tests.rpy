@@ -89,6 +89,28 @@ testsuite quest:
             migrate_quest_data()
             assert quest_document()["tasks"][0]["title"] == _long_title
 
+    testcase long_names_editor:
+        # La UI real debe aceptar más de los ~34 caracteres que recortaba
+        # pixel_width (bug detectado en Android). 60 reales superan ese tope
+        # con margen y no dependen del límite del modelo.
+        python:
+            _test.timeout = 30.0
+        click "Agregar tarea"
+        assert screen "add_task_screen"
+        screenshot "long-names-add-screen"
+        click "Toca para escribir…"
+        assert screen "quest_text_editor"
+        type "Tarea de prueba con nombre realmente largo para el editor"
+        screenshot "long-names-editor"
+        click "Listo"
+        click "Guardar tarea"
+        assert screen "view_tasks_screen"
+        python:
+            _typed = "Tarea de prueba con nombre realmente largo para el editor"
+            # save_task_form vacía el borrador al guardar: se valida la tarea.
+            assert len(tasks) == 1, ("guardada", len(tasks))
+            assert tasks[0]["title"] == _typed, ("titulo", tasks[0]["title"], len(tasks[0]["title"]))
+
     testcase document_safety:
         python:
             saved_document = quest_document()
