@@ -102,7 +102,7 @@ screen navigation_drawer():
             textbutton _("Nueva tarea") style "todo_button" action Function(open_task_form)
             textbutton _("Mis listas") style "todo_button" action Function(quest_navigate, "lists_screen")
             textbutton _("Calendario") style "todo_button" action Function(quest_navigate, "calendar_screen")
-            textbutton _("Mis logros") style "todo_button" action Function(quest_navigate, "progress_screen")
+            textbutton _("Mi base") style "todo_button" action Function(quest_navigate, "progress_screen")
             if quest_secondary():
                 textbutton _("Expediciones") style "todo_button" action Function(quest_navigate, "quest_world_hub")
             textbutton _("Cambiar mundo") style "todo_button" action Function(quest_navigate, "theme_screen")

@@ -33,7 +33,7 @@ screen progress_screen():
     add get_theme_bg()
 
     key "game_menu" action Function(quest_navigate)
-    use quest_header("Mis logros")
+    use quest_header("Mi base")
 
     $ total = len(tasks)
     $ done = sum(1 for t in tasks if t["done"])

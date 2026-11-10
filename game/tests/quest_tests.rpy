@@ -310,7 +310,8 @@ testsuite quest:
         python:
             assert current_theme == "océano"
         click "Menú"
-        click "Mis logros"
+        click "Mi base"
+        assert screen "progress_screen"
         screenshot "progress"
         click "Menú"
         click "Nueva tarea"

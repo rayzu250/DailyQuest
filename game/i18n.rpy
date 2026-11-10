@@ -22,8 +22,8 @@ translate english strings:
     old "Calendario"
     new "Calendar"
 
-    old "Mis logros"
-    new "My achievements"
+    old "Mi base"
+    new "My base"
 
     old "Expediciones"
     new "Expeditions"
