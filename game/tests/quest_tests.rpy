@@ -190,10 +190,15 @@ testsuite quest:
             add_new_task("Regar jardín")
             add_new_task("Contar estrellas")
             assert len(tasks) == 2
+            # La mutación de store.tasks no reinicia la interacción: sin un
+            # restart la lista de foco queda congelada y el click falla.
+            renpy.restart_interaction()
+        pause 1.0
         click "Contar estrellas"
         assert screen "task_detail_screen"
         click "Eliminar tarea"
         assert screen "confirm"
+        screenshot "confirm-delete"
         click "Sí"
         assert not screen "task_detail_screen"
         python:

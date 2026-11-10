@@ -920,35 +920,50 @@ style help_label_text:
 ##
 ## https://www.renpy.org/doc/html/screen_special.html#confirm
 
+## El cuadro por defecto de gui era demasiado pequeño en las pantallas de
+## juego; el panel del tema y los botones todo lo agrandan.
+
 screen confirm(message, yes_action, no_action):
 
-    ## Asegura que otras pantallas no reciban entrada mientras se muestra esta
-    ## pantalla.
     modal True
 
     zorder 200
 
-    style_prefix "confirm"
-
-    add "gui/overlay/confirm.png"
+    add Solid("#000000CC")
 
     frame:
-
+        xalign 0.5
+        yalign 0.5
+        xsize 900
+        padding (44, 38)
+        background get_theme_panel()
         vbox:
-            xalign .5
-            yalign .5
-            spacing 26
+            spacing 32
+            xfill True
 
-            label _(message):
-                style "confirm_prompt"
+            text _(message):
+                style "todo_text"
+                size 42
                 xalign 0.5
+                textalign 0.5
+                layout "subtitle"
+                xmaximum 812
 
             hbox:
                 xalign 0.5
-                spacing 85
+                spacing 48
 
-                textbutton _("Sí") action yes_action
-                textbutton _("No") action no_action
+                textbutton _("Sí"):
+                    style "todo_button_small"
+                    text_style "todo_button_small_text"
+                    text_size 34
+                    action yes_action
+
+                textbutton _("No"):
+                    style "todo_button_small"
+                    text_style "todo_button_small_text"
+                    text_size 34
+                    action no_action
 
     ## Clic derecho o escape responden "no".
     key "game_menu" action no_action
