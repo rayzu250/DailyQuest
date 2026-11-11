@@ -3,7 +3,7 @@ init python:
         "calendar_screen", "deadline_pick_screen", "theme_screen", "progress_screen", "move_task_screen",
         "quest_world_hub", "quest_expedition_scene", "quest_expedition_plan", "quest_convert_tasks")
 
-    def quest_navigate(page="view_tasks_screen"):
+    def quest_navigate(page="view_tasks_screen", **kwargs):
         renpy.run(DisableAllInputValues())
         renpy.hide_screen("quest_text_editor")
         renpy.hide_screen("navigation_drawer")
@@ -15,7 +15,7 @@ init python:
         if not renpy.get_screen("view_tasks_screen"):
             renpy.show_screen("view_tasks_screen")
         if page != "view_tasks_screen":
-            renpy.show_screen(page)
+            renpy.show_screen(page, **kwargs)
         renpy.restart_interaction()
 
     def open_task_form():

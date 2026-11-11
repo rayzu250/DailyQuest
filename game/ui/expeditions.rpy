@@ -130,9 +130,11 @@ screen quest_expedition_plan(index):
         textbutton "Guardar" style "todo_button_small" text_size 34 action Function(quest_save_plan, index)
         textbutton "Volver" style "todo_button_small" text_size 34 action Hide("quest_expedition_plan")
 
-screen quest_world_hub():
+screen quest_world_hub(tab="missions"):
     modal True
-    default tab = "missions"
+    # El parámetro solo fija la pestaña inicial; la pestaña activa es una
+    # variable de pantalla porque los parámetros se re-aplican al re-mostrar.
+    default hub_tab = tab
     default page = 0
     key "game_menu" action Function(quest_navigate)
     add get_theme_bg()
@@ -141,8 +143,8 @@ screen quest_world_hub():
         hbox:
             xalign 0.5 ypos 285 spacing 14
             for value, caption in [("missions", "Mapa"), ("history", "Historial"), ("resources", "Mi base")]:
-                textbutton caption style "todo_button_small" text_size 30 selected tab == value action [SetScreenVariable("tab", value), SetScreenVariable("page", 0)]
-        if tab in ("missions", "history"):
+                textbutton caption style "todo_button_small" text_size 30 selected hub_tab == value action [SetScreenVariable("hub_tab", value), SetScreenVariable("page", 0)]
+        if hub_tab in ("missions", "history"):
             $ mission_indices = quest_expedition_indices(tab == "history")
             $ max_page = max(0, (len(mission_indices) - 1) // 4)
             $ visible_page = min(page, max_page)

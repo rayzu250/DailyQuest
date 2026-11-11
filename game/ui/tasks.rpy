@@ -31,7 +31,10 @@ screen view_tasks_screen():
     add get_theme_bg()
     text _("Mis tareas") style "todo_title" xalign 0.5 ypos 45
     textbutton _("Menú") style "todo_button_small" text_style "todo_button_small_text" xpos 35 ypos 145 action Show("navigation_drawer")
-    textbutton _("Mi base") style "todo_button_small" text_style "todo_button_small_text" xalign 1.0 xoffset -35 ypos 145 action Function(quest_navigate, "progress_screen")
+    if quest_secondary():
+        # "Mi base" es la pestaña de recursos del hub de expediciones; en
+        # Primaria el botón se oculta para no dejar un callejón sin salida.
+        textbutton _("Mi base") style "todo_button_small" text_style "todo_button_small_text" xalign 1.0 xoffset -35 ypos 145 action Function(quest_navigate, "quest_world_hub", tab="resources")
     textbutton _("Lista: [current_list] ▾") style "todo_button" text_size 34 xalign 0.5 ypos 265 action Function(quest_navigate, "lists_screen")
     hbox:
         xalign 0.5 ypos 390 spacing 16

@@ -286,6 +286,30 @@ testsuite quest:
             _pasos = [s["text"] for s in tasks[0]["subtasks"]]
             assert _pasos == ["Paso Z", "Paso A"], ("pasos", _pasos)
 
+    testcase mi_base_button:
+        # El botón "Mi base" de Mis tareas abre el hub de expediciones en
+        # la pestaña Mi base (recursos), no la pantalla de estadísticas.
+        python:
+            quest_setting("school_stage", "secundaria")
+            renpy.restart_interaction()
+        pause 0.5
+        click "Mi base"
+        assert screen "quest_world_hub"
+        python:
+            _hub = renpy.get_screen("quest_world_hub")
+            assert _hub.scope["hub_tab"] == "resources", ("tab", _hub.scope["hub_tab"])
+        screenshot "mi-base-tab"
+        # Las pestañas siguen respondiendo dentro del hub.
+        click "Mapa"
+        python:
+            _hub = renpy.get_screen("quest_world_hub")
+            assert _hub.scope["hub_tab"] == "missions", ("tab mapa", _hub.scope["hub_tab"])
+        click "Mi base"
+        python:
+            _hub = renpy.get_screen("quest_world_hub")
+            assert _hub.scope["hub_tab"] == "resources", ("tab base", _hub.scope["hub_tab"])
+        run Function(quest_navigate)
+
     testcase text_and_navigation:
         click "Agregar tarea"
         assert screen "add_task_screen"
