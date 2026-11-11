@@ -24,7 +24,7 @@ define gui.show_name = False
 
 ## Versión del juego.
 
-define config.version = "1.3"
+define config.version = "1.4"
 
 # Los pendientes se corrigen con acciones explícitas, no retrocediendo el diálogo.
 define config.rollback_enabled = False
