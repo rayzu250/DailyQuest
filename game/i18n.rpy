@@ -25,6 +25,9 @@ translate english strings:
     old "Mi base"
     new "My base"
 
+    old "Mis logros"
+    new "My achievements"
+
     old "Expediciones"
     new "Expeditions"
 
